@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Your Account — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<h1>Your Account</h1>
+<div class="detail-layout" style="grid-template-columns: 1fr 1fr;">
+  <div class="card">
+    <h2>Profile Information</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Recent Orders</h2>
+    {% for order in orders %}
+      <div style="border-bottom:1px solid #eee; padding:10px 0;">
+        <strong>Order #{{ order.id }}</strong> — {{ order.get_status_display }}<br>
+        <span class="helptext">{{ order.created_at|date:"M d, Y" }} · ${{ order.get_total_cost }}</span>
+      </div>
+    {% empty %}
+      <p>You haven't placed any orders yet.</p>
+    {% endfor %}
+    <p><a href="{% url 'orders:order_history' %}">View all orders &rarr;</a></p>
+  </div>
+</div>
+{% endblock %}

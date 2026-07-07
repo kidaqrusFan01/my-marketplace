@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Corazon Marketplace{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- ============ TOP NAVBAR ============ -->
+  <header class="top-nav">
+    <button class="hamburger-btn" id="sidebarOpenBtn" aria-label="Open menu">&#9776;</button>
+
+    <a href="{% url 'products:home' %}" class="brand">Corazon<span>marketplace</span></a>
+
+    <form class="search-form" action="{% url 'products:home' %}" method="get">
+      <input type="text" name="q" placeholder="Search Corazon Marketplace" value="{{ query|default:'' }}">
+      <button type="submit" aria-label="Search">&#128269;</button>
+    </form>
+
+    <nav class="nav-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="nav-item hide-mobile">
+          Hello, {{ user.username }}<strong>Account &amp; Lists</strong>
+        </a>
+        {% if user.is_seller %}
+          <a href="{% url 'products:seller_dashboard' %}" class="nav-item hide-mobile">
+            Seller<strong>Dashboard</strong>
+          </a>
+        {% endif %}
+        <a href="{% url 'orders:order_history' %}" class="nav-item hide-mobile">
+          Returns<strong>&amp; Orders</strong>
+        </a>
+        <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="nav-item" style="background:none;border:none;cursor:pointer;">Sign Out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="nav-item">
+          Hello, sign in<strong>Account</strong>
+        </a>
+      {% endif %}
+
+      <a href="{% url 'cart:cart_detail' %}" class="nav-item cart-link">
+        &#128722;<span class="cart-badge">{{ cart_item_count|default:0 }}</span>
+        <span class="hide-mobile">Cart</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- ============ SUB NAV (categories) ============ -->
+  <div class="sub-nav">
+    <a href="{% url 'products:home' %}">All</a>
+    <a href="{% url 'jobs:job_list' %}">Careers</a>
+    {% if user.is_authenticated and user.is_seller %}
+      <a href="{% url 'products:product_create' %}">Sell a Product</a>
+    {% elif not user.is_authenticated %}
+      <a href="{% url 'accounts:signup_seller' %}">Become a Seller</a>
+    {% endif %}
+    <a href="{% url 'orders:order_history' %}">Your Orders</a>
+    <a href="/admin/">Admin</a>
+  </div>
+
+  <!-- ============ MOBILE SIDEBAR ============ -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="mobile-sidebar" id="mobileSidebar">
+    <div class="sidebar-header">
+      <h3>{% if user.is_authenticated %}Hello, {{ user.username }}{% else %}Hello, sign in{% endif %}</h3>
+      <button class="sidebar-close" id="sidebarCloseBtn" aria-label="Close menu">&times;</button>
+    </div>
+
+    {% if not user.is_authenticated %}
+    <div class="sidebar-section">
+      <a href="{% url 'accounts:login' %}"><strong>Sign In</strong></a>
+      <a href="{% url 'accounts:signup_customer' %}">Create a customer account</a>
+      <a href="{% url 'accounts:signup_seller' %}">Become a seller</a>
+    </div>
+    {% endif %}
+
+    <div class="sidebar-section">
+      <h4>Shop by Category</h4>
+      {% for cat in all_categories %}
+        <a href="{% url 'products:home' %}?category={{ cat.slug }}">{{ cat.icon }} {{ cat.name }}</a>
+      {% empty %}
+        <span class="sidebar-plain">No categories yet</span>
+      {% endfor %}
+    </div>
+
+    <div class="sidebar-section">
+      <h4>Your Account</h4>
+      {% if user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}">Profile</a>
+        <a href="{% url 'orders:order_history' %}">Your Orders</a>
+        {% if user.is_seller %}
+          <a href="{% url 'products:seller_dashboard' %}">Seller Dashboard</a>
+          <a href="{% url 'products:product_create' %}">Add a Product</a>
+        {% endif %}
+        <form action="{% url 'accounts:logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="sidebar-plain" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">Sign Out</button>
+        </form>
+      {% else %}
+        <span class="sidebar-plain">Sign in to view your orders</span>
+      {% endif %}
+    </div>
+
+    <div class="sidebar-section">
+      <h4>Help &amp; Careers</h4>
+      <a href="{% url 'jobs:job_list' %}">Job Openings</a>
+      <a href="{% url 'cart:cart_detail' %}">Your Cart</a>
+      <a href="/admin/">Admin Panel</a>
+    </div>
+  </aside>
+
+  <!-- ============ MESSAGES ============ -->
+  <div class="container">
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="page-wrap">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="footer-top" onclick="window.scrollTo({top:0, behavior:'smooth'});">Back to top</div>
+  <footer>
+    <p><strong>Corazon Marketplace</strong> &mdash; Your one-stop shop for everything.</p>
+    <p>
+      <a href="{% url 'jobs:job_list' %}">Careers</a> &middot;
+      <a href="{% url 'products:home' %}">Shop</a> &middot;
+      <a href="/admin/">Seller/Admin Login</a>
+    </p>
+    <p>&copy; {% now "Y" %} Corazon Marketplace. All rights reserved. (Demo project)</p>
+  </footer>
+
+  <script src="{% static 'js/script.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

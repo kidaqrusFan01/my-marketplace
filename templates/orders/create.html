@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<h1>Checkout</h1>
+<div style="display:grid; grid-template-columns: 1fr 340px; gap:24px; align-items:start;">
+  <div class="card">
+    <h2>Shipping Information</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary btn-block">Place Order</button>
+    </form>
+  </div>
+
+  <div class="cart-summary">
+    <h3>Order Summary</h3>
+    {% for item in cart %}
+      <div class="total-line"><span>{{ item.product.name }} &times; {{ item.quantity }}</span><span>${{ item.total_price }}</span></div>
+    {% endfor %}
+    <hr>
+    <div class="total-line grand-total"><span>Total:</span><span>${{ cart.get_total_price }}</span></div>
+  </div>
+</div>
+{% endblock %}

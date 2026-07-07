@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Seller Dashboard — Corazon Marketplace{% endblock %}
+
+{% block content %}
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <h1>Seller Dashboard</h1>
+    <a href="{% url 'products:product_create' %}" class="btn btn-primary">+ Add New Product</a>
+  </div>
+  <p>Store: <strong>{{ request.user.store_name|default:request.user.username }}</strong></p>
+
+  <div class="card" style="overflow-x:auto;">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr>
+            <td>
+              {% if product.image %}<img src="{{ product.image.url }}" alt="">{% else %}<img src="https://placehold.co/50x50" alt="">{% endif %}
+            </td>
+            <td>{{ product.name }}</td>
+            <td>${{ product.current_price }}</td>
+            <td>{{ product.stock }}</td>
+            <td>
+              {% if product.is_active %}
+                <span class="badge active">Active</span>
+              {% else %}
+                <span class="badge inactive">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'products:product_update' product.pk %}" class="btn btn-sm btn-outline">Edit</a>
+              <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">You haven't listed any products yet. <a href="{% url 'products:product_create' %}">Add your first product</a>.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:20px;">You can also manage products from the <a href="/admin/">full Django admin panel</a>.</p>
+{% endblock %}

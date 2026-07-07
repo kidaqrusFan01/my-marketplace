@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Corazon Marketplace — Shop Everything{% endblock %}
+
+{% block content %}
+  <section class="hero-carousel" id="heroCarousel" aria-label="Featured categories">
+    <div class="hero-track">
+      {% for slide in hero_slides %}
+        <div class="hero-slide {{ slide.css_class }} {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
+          <div class="hero-slide-content">
+            <span class="hero-eyebrow">{{ slide.eyebrow }}</span>
+            <h1>{{ slide.title }}</h1>
+            <p>{{ slide.subtitle }}</p>
+            <a href="{% url 'products:home' %}?category={{ slide.category_slug }}" class="btn btn-primary">{{ slide.cta_text }}</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button class="hero-arrow hero-arrow--prev" id="heroPrev" aria-label="Previous slide">&#10094;</button>
+    <button class="hero-arrow hero-arrow--next" id="heroNext" aria-label="Next slide">&#10095;</button>
+
+    <div class="hero-dots" id="heroDots">
+      {% for slide in hero_slides %}
+        <button class="hero-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="Go to slide {{ forloop.counter }}"></button>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if not query and not selected_category %}
+    <h2 class="section-title">Featured Products</h2>
+    <div class="grid">
+      {% for product in featured_products %}
+        {% include "products/_product_card.html" %}
+      {% empty %}
+        <p>No products yet — check back soon!</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <h2 class="section-title">
+    {% if query %}Results for "{{ query }}"{% elif selected_category %}{{ selected_category|title }}{% else %}All Products{% endif %}
+  </h2>
+
+  <div class="grid">
+    {% for product in page_obj %}
+      {% include "products/_product_card.html" %}
+    {% empty %}
+      <p>No products found. Try a different search or category.</p>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <div style="text-align:center; margin-top:24px;">
+      {% if page_obj.has_previous %}
+        <a class="btn" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">&laquo; Prev</a>
+      {% endif %}
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a class="btn" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next &raquo;</a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

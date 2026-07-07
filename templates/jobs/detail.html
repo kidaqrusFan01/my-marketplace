@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} — Careers — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<a href="{% url 'jobs:job_list' %}">&larr; Back to all jobs</a>
+<div class="card" style="margin-top:14px;">
+  <span class="job-tag">{{ job.get_job_type_display }}</span>
+  <h1>{{ job.title }}</h1>
+  <p class="helptext">{{ job.department }} &middot; {{ job.location }}</p>
+  <h3>Description</h3>
+  <p>{{ job.description|linebreaks }}</p>
+  {% if job.requirements %}
+    <h3>Requirements</h3>
+    <p>{{ job.requirements|linebreaks }}</p>
+  {% endif %}
+</div>
+
+<div class="form-box">
+  <h2>Apply for this Position</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-block">Submit Application</button>
+  </form>
+</div>
+{% endblock %}

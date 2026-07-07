@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Careers — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<h1>Careers at Corazon Marketplace</h1>
+<p>Join our growing team. Browse open roles below and apply directly online.</p>
+
+<div style="margin-bottom:16px;">
+  <form method="get">
+    <label for="job_type" style="font-weight:600; margin-right:8px;">Filter by type:</label>
+    <select name="job_type" id="job_type" onchange="this.form.submit()">
+      <option value="">All types</option>
+      {% for value, label in job_type_choices %}
+        <option value="{{ value }}" {% if value == selected_type %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% for job in jobs %}
+  <div class="job-card">
+    <span class="job-tag">{{ job.get_job_type_display }}</span>
+    <h3><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></h3>
+    <p class="helptext">{{ job.department }} &middot; {{ job.location }} &middot; Posted {{ job.posted_at|date:"M d, Y" }}</p>
+    <p>{{ job.description|truncatewords:30 }}</p>
+    <a href="{{ job.get_absolute_url }}" class="btn btn-primary">View &amp; Apply</a>
+  </div>
+{% empty %}
+  <p>No open positions right now. Please check back soon!</p>
+{% endfor %}
+{% endblock %}

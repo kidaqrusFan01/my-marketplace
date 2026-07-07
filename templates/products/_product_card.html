@@ -1,0 +1,28 @@
+<div class="product-card">
+  <a href="{{ product.get_absolute_url }}" class="thumb">
+    {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" width="220" height="220" loading="lazy" decoding="async">
+    {% else %}
+      <img src="https://placehold.co/220x220?text={{ product.name|urlencode }}" alt="{{ product.name }}" width="220" height="220" loading="lazy" decoding="async">
+    {% endif %}
+  </a>
+  <div class="body">
+    <a href="{{ product.get_absolute_url }}" class="title">{{ product.name }}</a>
+    <div class="price">
+      ${{ product.current_price }}
+      {% if product.discount_price %}<span class="old-price">${{ product.price }}</span>{% endif %}
+    </div>
+    {% if product.in_stock %}
+      <span class="stock-status in">In stock</span>
+    {% else %}
+      <span class="stock-status out">Out of stock</span>
+    {% endif %}
+    <form action="{% url 'cart:cart_add' product.id %}" method="post" style="margin-top:auto;">
+      {% csrf_token %}
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="btn btn-primary btn-block" {% if not product.in_stock %}disabled{% endif %}>
+        Add to Cart
+      </button>
+    </form>
+  </div>
+</div>

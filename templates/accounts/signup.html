@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="form-box">
+  <h2>{% if user_type == 'seller' %}Become a Seller{% else %}Create Your Account{% endif %}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+  </form>
+
+  <p style="text-align:center; margin-top:14px;">
+    {% if user_type == 'seller' %}
+      Not a seller? <a href="{% url 'accounts:signup_customer' %}">Sign up as a customer</a>
+    {% else %}
+      Want to sell on Corazon? <a href="{% url 'accounts:signup_seller' %}">Become a seller</a>
+    {% endif %}
+  </p>
+  <p style="text-align:center;">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+</div>
+{% endblock %}

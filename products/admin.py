@@ -1,0 +1,59 @@
+from django.contrib import admin
+from .models import Category, Product, ProductImage, Review
+
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'seller', 'category', 'price', 'discount_price', 'stock', 'is_active', 'created_at')
+    list_filter = ('is_active', 'category')
+    search_fields = ('name', 'description', 'seller__username')
+    inlines = [ProductImageInline]
+
+    def get_queryset(self, request):
+        """
+        Sellers only ever see and manage their OWN products in the admin.
+        Superusers and regular (non-seller) staff members see everything.
+        """
+        qs = super().get_queryset(request)
+        if request.user.is_superuser or not request.user.is_seller:
+            return qs
+        return qs.filter(seller=request.user)
+
+    def save_model(self, request, obj, form, change):
+        if request.user.is_seller and not request.user.is_superuser and not obj.pk:
+            obj.seller = request.user
+        super().save_model(request, obj, form, change)
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None and request.user.is_seller and not request.user.is_superuser:
+            return obj.seller_id == request.user.id
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None and request.user.is_seller and not request.user.is_superuser:
+            return obj.seller_id == request.user.id
+        return super().has_delete_permission(request, obj)
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Hide the 'seller' field from sellers editing in admin — it's set automatically."""
+        form = super().get_form(request, obj, **kwargs)
+        if request.user.is_seller and not request.user.is_superuser and 'seller' in form.base_fields:
+            del form.base_fields['seller']
+        return form
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'rating', 'created_at')
+    list_filter = ('rating',)

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+  <div class="detail-image">
+    {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" width="400" height="400" decoding="async">
+    {% else %}
+      <img src="https://placehold.co/400x400?text={{ product.name|urlencode }}" alt="{{ product.name }}" width="400" height="400" decoding="async">
+    {% endif %}
+  </div>
+
+  <div>
+    <h1>{{ product.name }}</h1>
+    <p><a href="#reviews" class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</a> ({{ reviews.count }} review{{ reviews.count|pluralize }})</p>
+    <p>Sold by <strong>{{ product.seller.store_name|default:product.seller.username }}</strong></p>
+    <hr>
+    <p>{{ product.description|linebreaks }}</p>
+  </div>
+
+  <div class="buy-box">
+    <div class="price">
+      ${{ product.current_price }}
+      {% if product.discount_price %}<span class="old-price" style="text-decoration:line-through;color:#565959;">${{ product.price }}</span>{% endif %}
+    </div>
+    {% if product.in_stock %}
+      <p class="stock-status in">In Stock ({{ product.stock }} available)</p>
+    {% else %}
+      <p class="stock-status out">Out of Stock</p>
+    {% endif %}
+
+    <form action="{% url 'cart:cart_add' product.id %}" method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="qty">Quantity</label>
+        <select name="quantity" id="qty">
+          {% for i in "12345"|make_list %}
+            <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" {% if not product.in_stock %}disabled{% endif %}>
+        Add to Cart
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if related_products %}
+  <h2 class="section-title">You might also like</h2>
+  <div class="grid">
+    {% for product in related_products %}
+      {% include "products/_product_card.html" %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+<h2 class="section-title" id="reviews">Customer Reviews</h2>
+{% for review in reviews %}
+  <div class="card" style="margin-bottom:12px;">
+    <p class="star-rating">{{ review.rating }}/5 &#9733;</p>
+    <strong>{{ review.user.username }}</strong>
+    <p>{{ review.comment }}</p>
+  </div>
+{% empty %}
+  <p>No reviews yet. Be the first to review this product!</p>
+{% endfor %}
+
+{% if review_form %}
+  <div class="form-box">
+    <h2>Write a Review</h2>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{{ review_form.rating.label }}</label>
+        {{ review_form.rating }}
+      </div>
+      <div class="form-group">
+        <label>{{ review_form.comment.label }}</label>
+        {{ review_form.comment }}
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+    </form>
+  </div>
+{% else %}
+  <p><a href="{% url 'accounts:login' %}">Sign in</a> to write a review.</p>
+{% endif %}
+{% endblock %}
