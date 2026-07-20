@@ -5,8 +5,8 @@
 <h1>Shopping Cart</h1>
 
 {% if cart|length > 0 %}
-<div style="display:grid; grid-template-columns: 1fr 340px; gap:24px; align-items:start;">
-  <div class="card" style="overflow-x:auto;">
+<div class="cart-layout">
+  <div class="card cart-table-wrap">
     <table class="cart-table">
       <thead>
         <tr><th>Product</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr>
@@ -14,25 +14,25 @@
       <tbody>
         {% for item in cart %}
           <tr>
-            <td style="display:flex; align-items:center; gap:10px;">
+            <td data-label="Product" class="cart-product-cell">
               {% if item.product.image %}
-                <img class="cart-row-img" src="{{ item.product.image.url }}" alt="">
+                <img class="cart-row-img" src="{{ item.product.image.url }}" alt="" width="70" height="70" loading="lazy">
               {% else %}
-                <img class="cart-row-img" src="https://placehold.co/70x70" alt="">
+                <img class="cart-row-img" src="https://placehold.co/70x70" alt="" width="70" height="70" loading="lazy">
               {% endif %}
               <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
             </td>
-            <td>${{ item.price }}</td>
-            <td>
-              <form action="{% url 'cart:cart_add' item.product.id %}" method="post" style="display:flex; gap:6px;">
+            <td data-label="Price">${{ item.price }}</td>
+            <td data-label="Quantity">
+              <form action="{% url 'cart:cart_add' item.product.id %}" method="post" class="cart-qty-form">
                 {% csrf_token %}
                 {{ item.update_quantity_form.quantity }}
                 {{ item.update_quantity_form.override }}
                 <button type="submit" class="btn btn-sm btn-outline">Update</button>
               </form>
             </td>
-            <td>${{ item.total_price }}</td>
-            <td>
+            <td data-label="Subtotal">${{ item.total_price }}</td>
+            <td data-label="">
               <form action="{% url 'cart:cart_remove' item.product.id %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-danger">Remove</button>

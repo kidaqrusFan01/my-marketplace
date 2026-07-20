@@ -7,11 +7,43 @@
     <div class="hero-track">
       {% for slide in hero_slides %}
         <div class="hero-slide {{ slide.css_class }} {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
-          <div class="hero-slide-content">
-            <span class="hero-eyebrow">{{ slide.eyebrow }}</span>
-            <h1>{{ slide.title }}</h1>
-            <p>{{ slide.subtitle }}</p>
-            <a href="{% url 'products:home' %}?category={{ slide.category_slug }}" class="btn btn-primary">{{ slide.cta_text }}</a>
+          <div class="hero-slide-inner">
+            <div class="hero-slide-content">
+              <span class="hero-eyebrow">{{ slide.eyebrow }}</span>
+              <h1>{{ slide.title }}</h1>
+              <p>{{ slide.subtitle }}</p>
+              <a href="{% url 'products:home' %}?category={{ slide.category_slug }}" class="btn btn-primary">{{ slide.cta_text }}</a>
+            </div>
+            <div class="hero-slide-icon" aria-hidden="true">
+              {% if slide.name == 'electronics' %}
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="30" y="40" width="140" height="90" rx="10" stroke="white" stroke-width="6" opacity="0.85"/>
+                  <rect x="55" y="145" width="90" height="10" rx="5" fill="white" opacity="0.85"/>
+                  <circle cx="100" cy="85" r="26" stroke="white" stroke-width="6" opacity="0.6"/>
+                </svg>
+              {% elif slide.name == 'fashion' %}
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M70 40 L100 60 L130 40 L160 70 L140 90 L140 165 L60 165 L60 90 L40 70 Z" stroke="white" stroke-width="6" stroke-linejoin="round" opacity="0.85"/>
+                  <circle cx="100" cy="55" r="12" stroke="white" stroke-width="6" opacity="0.6"/>
+                </svg>
+              {% elif slide.name == 'home' %}
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M40 100 L100 50 L160 100" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+                  <rect x="55" y="100" width="90" height="65" rx="6" stroke="white" stroke-width="6" opacity="0.85"/>
+                  <rect x="90" y="125" width="20" height="40" stroke="white" stroke-width="5" opacity="0.6"/>
+                </svg>
+              {% elif slide.name == 'sports' %}
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="100" cy="100" r="55" stroke="white" stroke-width="6" opacity="0.85"/>
+                  <path d="M45 100 H155 M100 45 V155 M65 65 L135 135 M65 135 L135 65" stroke="white" stroke-width="4" opacity="0.5"/>
+                </svg>
+              {% else %}
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M50 45 H105 A18 18 0 0 1 123 63 V155 H68 A18 18 0 0 1 50 137 Z" stroke="white" stroke-width="6" stroke-linejoin="round" opacity="0.85"/>
+                  <path d="M150 45 H95 A18 18 0 0 0 77 63 V155 H132 A18 18 0 0 0 150 137 Z" stroke="white" stroke-width="6" stroke-linejoin="round" opacity="0.6"/>
+                </svg>
+              {% endif %}
+            </div>
           </div>
         </div>
       {% endfor %}

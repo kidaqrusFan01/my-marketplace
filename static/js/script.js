@@ -5,14 +5,20 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeBtn = document.getElementById('sidebarCloseBtn');
 
   function openSidebar() {
+    // Compensate for the scrollbar disappearing so page content doesn't
+    // visibly jump sideways when overflow gets locked (a common source of
+    // perceived "lag"/jank when opening a mobile nav).
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     sidebar.classList.add('active');
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) document.body.style.paddingRight = scrollbarWidth + 'px';
   }
   function closeSidebar() {
     sidebar.classList.remove('active');
     overlay.classList.remove('active');
     document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
   }
 
   if (openBtn) openBtn.addEventListener('click', openSidebar);
