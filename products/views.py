@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .models import Product, Category, Review
+from .models import Product, Category, Review, HeroBanner
 from .forms import ProductForm, ReviewForm
 
 
@@ -12,64 +12,59 @@ def is_seller(user):
     return user.is_authenticated and user.is_seller
 
 
-# Rotating hero banner slides — Amazon-style category carousel.
-# Each slide uses a CSS gradient "scene" (css_class) instead of a hotlinked photo,
-# so the banner never breaks and needs no external image hosting.
-#
-# TO SWAP IN REAL PHOTOGRAPHY LATER:
-#   1. Drop your image files into static/images/hero/ (e.g. electronics.jpg)
-#   2. In static/css/style.css, find the matching ".hero-slide--<name>" rule
-#      and add:  background-image: url('/static/images/hero/electronics.jpg');
-#      background-size: cover; background-position: center;
-#   3. That's it — the gradient becomes a photo, everything else (timing,
-#      dots, fade transition) keeps working unchanged.
-HERO_SLIDES = [
-    {
-        'name': 'electronics',
-        'eyebrow': 'Tech Deals',
-        'title': 'Level Up Your Setup',
-        'subtitle': 'Save big on headphones, TVs, and smart home gear.',
-        'cta_text': 'Shop Electronics',
-        'category_slug': 'electronics',
-        'css_class': 'hero-slide--electronics',
-    },
-    {
-        'name': 'fashion',
-        'eyebrow': 'New Season',
-        'title': 'Refresh Your Wardrobe',
-        'subtitle': 'Denim, footwear, and everyday essentials on sale.',
-        'cta_text': 'Shop Fashion',
-        'category_slug': 'fashion',
-        'css_class': 'hero-slide--fashion',
-    },
-    {
-        'name': 'home',
-        'eyebrow': 'Home Refresh',
-        'title': 'Upgrade Every Room',
-        'subtitle': 'Cookware, robot vacuums, and more for your home.',
-        'cta_text': 'Shop Home & Kitchen',
-        'category_slug': 'home-kitchen',
-        'css_class': 'hero-slide--home',
-    },
-    {
-        'name': 'sports',
-        'eyebrow': 'Get Moving',
-        'title': 'Gear Up for Fitness',
-        'subtitle': 'Yoga mats, dumbbells, and outdoor essentials.',
-        'cta_text': 'Shop Sports & Outdoors',
-        'category_slug': 'sports-outdoors',
-        'css_class': 'hero-slide--sports',
-    },
-    {
-        'name': 'books',
-        'eyebrow': "Reader's Corner",
-        'title': 'Your Next Favorite Read',
-        'subtitle': 'Fiction, guides, and everything in between.',
-        'cta_text': 'Shop Books',
-        'category_slug': 'books',
-        'css_class': 'hero-slide--books',
-    },
+# Fallback content used ONLY if no HeroBanner rows exist yet (e.g. right
+# after a fresh migrate, before anyone has added banners in admin) — so the
+# homepage never looks broken/empty on a brand-new install.
+DEFAULT_HERO_SLIDES = [
+    {'eyebrow': 'Tech Deals', 'title': 'Level Up Your Setup',
+     'subtitle': 'Save big on headphones, TVs, and smart home gear.',
+     'cta_text': 'Shop Electronics', 'category_slug': 'electronics', 'placeholder_style': 'electronics'},
+    {'eyebrow': 'New Season', 'title': 'Refresh Your Wardrobe',
+     'subtitle': 'Denim, footwear, and everyday essentials on sale.',
+     'cta_text': 'Shop Fashion', 'category_slug': 'fashion', 'placeholder_style': 'fashion'},
+    {'eyebrow': 'Home Refresh', 'title': 'Upgrade Every Room',
+     'subtitle': 'Cookware, robot vacuums, and more for your home.',
+     'cta_text': 'Shop Home & Kitchen', 'category_slug': 'home-kitchen', 'placeholder_style': 'home'},
+    {'eyebrow': 'Get Moving', 'title': 'Gear Up for Fitness',
+     'subtitle': 'Yoga mats, dumbbells, and outdoor essentials.',
+     'cta_text': 'Shop Sports & Outdoors', 'category_slug': 'sports-outdoors', 'placeholder_style': 'sports'},
+    {'eyebrow': "Reader's Corner", 'title': 'Your Next Favorite Read',
+     'subtitle': 'Fiction, guides, and everything in between.',
+     'cta_text': 'Shop Books', 'category_slug': 'books', 'placeholder_style': 'books'},
 ]
+
+
+def get_hero_slides():
+    """
+    Builds the list of slides for the homepage carousel from HeroBanner rows
+    in the database (managed via Django admin -> Hero Banners). Each slide
+    gets either a real uploaded photo (image_url) or falls back to a
+    gradient + icon placeholder (placeholder_style) if no image was
+    uploaded for that banner yet.
+    """
+    banners = HeroBanner.objects.filter(is_active=True).select_related('category')
+
+    if not banners.exists():
+        # Nothing configured yet in admin — show sensible defaults instead
+        # of an empty carousel.
+        return [
+            {**slide, 'image_url': None, 'css_class': f"hero-slide--{slide['placeholder_style']}"}
+            for slide in DEFAULT_HERO_SLIDES
+        ]
+
+    slides = []
+    for banner in banners:
+        slides.append({
+            'eyebrow': banner.eyebrow,
+            'title': banner.title,
+            'subtitle': banner.subtitle,
+            'cta_text': banner.cta_text,
+            'category_slug': banner.category.slug if banner.category else '',
+            'placeholder_style': banner.placeholder_style,
+            'css_class': f"hero-slide--{banner.placeholder_style}",
+            'image_url': banner.image.url if banner.image else None,
+        })
+    return slides
 
 
 def home(request):
@@ -98,7 +93,7 @@ def home(request):
         'featured_products': featured_products,
         'query': query,
         'selected_category': category_slug,
-        'hero_slides': HERO_SLIDES,
+        'hero_slides': get_hero_slides(),
     }
     return render(request, 'products/home.html', context)
 
@@ -132,6 +127,7 @@ def product_detail(request, slug):
         'reviews': reviews,
         'related_products': related_products,
         'review_form': review_form,
+        'share_url': request.build_absolute_uri(product.get_absolute_url()),
     }
     return render(request, 'products/product_detail.html', context)
 

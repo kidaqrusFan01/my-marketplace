@@ -2,7 +2,7 @@
 {% block title %}{{ product.name }} — Corazon Marketplace{% endblock %}
 
 {% block content %}
-<div class="detail-layout">
+<div class="pdp-layout">
   <div class="detail-image">
     {% if product.image %}
       <img src="{{ product.image.url }}" alt="{{ product.name }}" width="400" height="400" decoding="async">
@@ -11,39 +11,59 @@
     {% endif %}
   </div>
 
-  <div>
+  <div class="pdp-info">
     <h1>{{ product.name }}</h1>
     <p><a href="#reviews" class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</a> ({{ reviews.count }} review{{ reviews.count|pluralize }})</p>
     <p>Sold by <strong>{{ product.seller.store_name|default:product.seller.username }}</strong></p>
+
+    <!-- Price + Add to Cart appear immediately, above the description,
+         so shoppers can buy without scrolling past product copy first. -->
+    <div class="buy-box">
+      <div class="price">
+        ${{ product.current_price }}
+        {% if product.discount_price %}<span class="old-price" style="text-decoration:line-through;color:#565959;">${{ product.price }}</span>{% endif %}
+      </div>
+      {% if product.in_stock %}
+        <p class="stock-status in">In Stock ({{ product.stock }} available)</p>
+      {% else %}
+        <p class="stock-status out">Out of Stock</p>
+      {% endif %}
+
+      <form action="{% url 'cart:cart_add' product.id %}" method="post" class="buy-box-form">
+        {% csrf_token %}
+        <div class="form-group qty-group">
+          <label for="qty">Qty</label>
+          <select name="quantity" id="qty">
+            {% for i in "12345"|make_list %}
+              <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" {% if not product.in_stock %}disabled{% endif %}>
+          Add to Cart
+        </button>
+      </form>
+    </div>
+
+    <!-- Share button -->
+    <div class="share-widget">
+      <button type="button" class="btn btn-outline btn-sm share-toggle" id="shareToggleBtn"
+              data-share-url="{{ share_url }}" data-share-title="{{ product.name }}"
+              aria-haspopup="true" aria-expanded="false">
+        &#128257; Share
+      </button>
+      <div class="share-menu" id="shareMenu" hidden>
+        <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ product.name|urlencode }}" target="_blank" rel="noopener noreferrer">Share on X / Twitter</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+        <a href="https://api.whatsapp.com/send?text={{ product.name|urlencode }}%20{{ share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on LinkedIn</a>
+        <a href="mailto:?subject={{ product.name|urlencode }}&body={{ share_url|urlencode }}">Share via Email</a>
+        <button type="button" class="share-copy-btn" data-copy-url="{{ share_url }}">Copy Link</button>
+      </div>
+    </div>
+
     <hr>
     <p>{{ product.description|linebreaks }}</p>
-  </div>
-
-  <div class="buy-box">
-    <div class="price">
-      ${{ product.current_price }}
-      {% if product.discount_price %}<span class="old-price" style="text-decoration:line-through;color:#565959;">${{ product.price }}</span>{% endif %}
-    </div>
-    {% if product.in_stock %}
-      <p class="stock-status in">In Stock ({{ product.stock }} available)</p>
-    {% else %}
-      <p class="stock-status out">Out of Stock</p>
-    {% endif %}
-
-    <form action="{% url 'cart:cart_add' product.id %}" method="post">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="qty">Quantity</label>
-        <select name="quantity" id="qty">
-          {% for i in "12345"|make_list %}
-            <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" {% if not product.in_stock %}disabled{% endif %}>
-        Add to Cart
-      </button>
-    </form>
   </div>
 </div>
 

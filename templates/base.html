@@ -34,12 +34,12 @@
         <a href="{% url 'orders:order_history' %}" class="nav-item hide-mobile">
           Returns<strong>&amp; Orders</strong>
         </a>
-        <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
+        <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;" class="hide-mobile">
           {% csrf_token %}
           <button type="submit" class="nav-item" style="background:none;border:none;cursor:pointer;">Sign Out</button>
         </form>
       {% else %}
-        <a href="{% url 'accounts:login' %}" class="nav-item">
+        <a href="{% url 'accounts:login' %}" class="nav-item hide-mobile">
           Hello, sign in<strong>Account</strong>
         </a>
       {% endif %}

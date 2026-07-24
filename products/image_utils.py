@@ -18,11 +18,12 @@ MAX_DIMENSION = (1000, 1000)
 JPEG_QUALITY = 82
 
 
-def optimize_image_field(image_field, filename_hint="image.jpg"):
+def optimize_image_field(image_field, filename_hint="image.jpg", max_dimension=None):
     """
     Given a Django ImageFieldFile (already saved to storage), re-process it
     in place: fix orientation, flatten transparency onto white, downscale to
-    fit MAX_DIMENSION, and re-save as an optimized JPEG.
+    fit max_dimension (defaults to MAX_DIMENSION), and re-save as an
+    optimized JPEG.
 
     Returns True if it processed successfully, False if it skipped (e.g. the
     file couldn't be read as an image) — callers should not treat False as
@@ -30,6 +31,8 @@ def optimize_image_field(image_field, filename_hint="image.jpg"):
     """
     if not image_field:
         return False
+
+    max_dimension = max_dimension or MAX_DIMENSION
 
     try:
         image_field.open()
@@ -51,8 +54,8 @@ def optimize_image_field(image_field, filename_hint="image.jpg"):
     else:
         img = img.convert("RGB")
 
-    # Downscale to fit within MAX_DIMENSION; thumbnail() never upscales
-    img.thumbnail(MAX_DIMENSION, Image.LANCZOS)
+    # Downscale to fit within max_dimension; thumbnail() never upscales
+    img.thumbnail(max_dimension, Image.LANCZOS)
 
     buffer = BytesIO()
     img.save(buffer, format="JPEG", quality=JPEG_QUALITY, optimize=True)

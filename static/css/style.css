@@ -327,8 +327,20 @@ img { max-width: 100%; display: block; }
   transition: opacity 0.9s ease;
   padding: 0 24px;
   color: var(--white);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .hero-slide.active { opacity: 1; z-index: 1; }
+
+/* Darkens an uploaded photo slide so white headline text stays readable
+   regardless of how bright/busy the photo is. Only rendered for slides
+   that have a real uploaded image (see home.html). */
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.1) 100%);
+}
 
 /* Decorative background "scenes" — swap for real photography by adding
    background-image + background-size:cover to any of these rules. */
@@ -341,6 +353,8 @@ img { max-width: 100%; display: block; }
 /* Inner column keeps text aligned with the page content (same max-width as
    .container) even though the slide background itself spans full width. */
 .hero-slide-inner {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 1500px;
   margin: 0 auto;
@@ -547,6 +561,16 @@ img { max-width: 100%; display: block; }
   grid-template-columns: 1fr 1fr;
   gap: 24px;
 }
+/* Product detail page: image on the left, everything else (title, price,
+   Add to Cart, share, description) in a single right-hand column so the
+   buy box always appears before the description, at any screen size. */
+.pdp-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) 1fr;
+  gap: 32px;
+  align-items: start;
+}
+.pdp-info { min-width: 0; }
 .detail-image {
   background: var(--white);
   border-radius: var(--radius);
@@ -559,8 +583,48 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
 }
 .detail-image img { width: 100%; height: 100%; object-fit: contain; }
-.buy-box { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; align-self: start; }
+.buy-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 14px 0;
+}
 .buy-box .price { font-size: 26px; color: var(--price-red); margin: 6px 0; }
+.buy-box-form { display: flex; align-items: flex-end; gap: 12px; margin-top: 10px; }
+.buy-box-form .qty-group { margin-bottom: 0; }
+.buy-box-form select { width: auto; min-width: 70px; }
+
+/* ---------------- Share widget ---------------- */
+.share-widget { position: relative; display: inline-block; margin-bottom: 14px; }
+.share-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 14px rgba(15,17,17,0.2);
+  min-width: 200px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}
+.share-menu a, .share-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--text-dark);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.share-menu a:hover, .share-menu button:hover { background: var(--bg); }
+.share-copy-btn.copied { color: var(--success); font-weight: 600; }
 
 /* ---------------- Job cards ---------------- */
 .job-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; }
@@ -597,8 +661,15 @@ footer a { color: var(--white); }
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
   .detail-layout { grid-template-columns: 1fr; }
+  .pdp-layout { grid-template-columns: 1fr; }
   .nav-links .nav-item.hide-mobile { display: none; }
   .brand { font-size: 18px; }
+
+  /* Search bar gets guaranteed full-width real estate on its own row,
+     instead of fighting the hamburger/brand/cart for leftover space
+     (that squeeze is what made it disappear before). */
+  .top-nav { flex-wrap: wrap; row-gap: 10px; }
+  .search-form { order: 5; flex: 1 1 100%; }
 }
 
 @media (max-width: 700px) {

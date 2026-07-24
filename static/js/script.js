@@ -80,5 +80,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (slides.length > 1) startAutoplay();
   }
+
+  // ---------------- Product share button ----------------
+  const shareBtn = document.getElementById('shareToggleBtn');
+  const shareMenu = document.getElementById('shareMenu');
+  if (shareBtn && shareMenu) {
+    shareBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const url = shareBtn.dataset.shareUrl;
+      const title = shareBtn.dataset.shareTitle;
+
+      // On phones/tablets that support it, use the native share sheet
+      // (Messages, WhatsApp, Instagram, etc. all show up automatically).
+      if (navigator.share) {
+        navigator.share({ title: title, url: url }).catch(function () {
+          // User cancelled the native share sheet — no action needed.
+        });
+        return;
+      }
+
+      // Desktop fallback: toggle our own dropdown of platform links.
+      const isOpen = !shareMenu.hidden;
+      shareMenu.hidden = isOpen;
+      shareBtn.setAttribute('aria-expanded', String(!isOpen));
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!shareMenu.hidden && !shareMenu.contains(e.target) && e.target !== shareBtn) {
+        shareMenu.hidden = true;
+        shareBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    const copyBtn = shareMenu.querySelector('.share-copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        const url = copyBtn.dataset.copyUrl;
+        const originalText = copyBtn.textContent;
+        navigator.clipboard.writeText(url).then(function () {
+          copyBtn.textContent = 'Link copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(function () {
+            copyBtn.textContent = originalText;
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+    }
+  }
 });
 

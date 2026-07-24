@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, Review
+from django.utils.html import format_html
+from .models import Category, Product, ProductImage, Review, HeroBanner
 
 
 class ProductImageInline(admin.TabularInline):
@@ -57,3 +58,23 @@ class ProductAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'rating', 'created_at')
     list_filter = ('rating',)
+
+
+@admin.register(HeroBanner)
+class HeroBannerAdmin(admin.ModelAdmin):
+    """
+    Platform-level (superuser) tool for managing the homepage rotating
+    banner. Not exposed to sellers — only Product/ProductImage permissions
+    are ever granted to seller accounts.
+    """
+    list_display = ('title', 'preview', 'category', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+    list_filter = ('is_active',)
+    fields = ('title', 'eyebrow', 'subtitle', 'cta_text', 'category',
+              'image', 'placeholder_style', 'order', 'is_active')
+
+    def preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="height:40px;border-radius:4px;">', obj.image.url)
+        return "(no image — using placeholder)"
+    preview.short_description = "Image"

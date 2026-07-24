@@ -118,3 +118,59 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name} ({self.rating}/5)"
+
+
+class HeroBanner(models.Model):
+    """
+    A single slide in the homepage rotating hero carousel.
+    Upload a real photo here (Django admin -> Hero Banners) and it replaces
+    the illustrated placeholder automatically — no code/template edits
+    needed. If no image is uploaded, the slide falls back to a gradient +
+    icon placeholder so the carousel is never literally blank.
+    """
+    title = models.CharField(max_length=100, help_text="Big headline text, e.g. 'Level Up Your Setup'")
+    eyebrow = models.CharField(
+        max_length=60, blank=True,
+        help_text="Small label above the title, e.g. 'Tech Deals'"
+    )
+    subtitle = models.CharField(max_length=200, blank=True)
+    cta_text = models.CharField(max_length=50, default="Shop Now")
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True,
+        help_text="Clicking the slide's button takes shoppers to this category."
+    )
+    image = models.ImageField(
+        upload_to='hero_banners/', blank=True, null=True,
+        help_text="Recommended: a wide landscape photo (at least 1600x600). "
+                   "It will be automatically resized/optimized and cropped to fill the banner."
+    )
+    # Used only when no image is uploaded, so the slide still looks intentional.
+    PLACEHOLDER_STYLE_CHOICES = [
+        ('electronics', 'Electronics (dark blue)'),
+        ('fashion', 'Fashion (purple)'),
+        ('home', 'Home & Kitchen (teal/green)'),
+        ('sports', 'Sports & Outdoors (orange/pink)'),
+        ('books', 'Books (blue/green)'),
+    ]
+    placeholder_style = models.CharField(
+        max_length=20, choices=PLACEHOLDER_STYLE_CHOICES, default='electronics'
+    )
+    order = models.PositiveIntegerField(default=0, help_text="Lower numbers appear first.")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def save(self, *args, **kwargs):
+        is_new_upload = bool(self.image) and not self.image._committed
+        super().save(*args, **kwargs)
+        if is_new_upload:
+            from .image_utils import optimize_image_field
+            original_name = self.image.name
+            # Hero banners are wide, so give them a bigger max size than the
+            # square product-thumbnail default.
+            if optimize_image_field(self.image, filename_hint=original_name, max_dimension=(1920, 1080)):
+                super().save(update_fields=['image'])
+
+    def __str__(self):
+        return self.title
