@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load currency_filters %}
 {% block title %}Seller Dashboard — Corazon Marketplace{% endblock %}
 
 {% block content %}
@@ -27,7 +28,7 @@
               {% if product.image %}<img src="{{ product.image.url }}" alt="">{% else %}<img src="https://placehold.co/50x50" alt="">{% endif %}
             </td>
             <td>{{ product.name }}</td>
-            <td>${{ product.current_price }}</td>
+            <td>{{ product.current_price|naira }}</td>
             <td>{{ product.stock }}</td>
             <td>
               {% if product.is_active %}

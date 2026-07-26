@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load currency_filters %}
 {% block title %}Your Cart — Corazon Marketplace{% endblock %}
 
 {% block content %}
@@ -22,7 +23,7 @@
               {% endif %}
               <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
             </td>
-            <td data-label="Price">${{ item.price }}</td>
+            <td data-label="Price">{{ item.price|naira }}</td>
             <td data-label="Quantity">
               <form action="{% url 'cart:cart_add' item.product.id %}" method="post" class="cart-qty-form">
                 {% csrf_token %}
@@ -31,7 +32,7 @@
                 <button type="submit" class="btn btn-sm btn-outline">Update</button>
               </form>
             </td>
-            <td data-label="Subtotal">${{ item.total_price }}</td>
+            <td data-label="Subtotal">{{ item.total_price|naira }}</td>
             <td data-label="">
               <form action="{% url 'cart:cart_remove' item.product.id %}" method="post">
                 {% csrf_token %}
@@ -46,7 +47,7 @@
 
   <div class="cart-summary">
     <div class="total-line"><span>Items:</span><span>{{ cart|length }}</span></div>
-    <div class="total-line grand-total"><span>Total:</span><span>${{ cart.get_total_price }}</span></div>
+    <div class="total-line grand-total"><span>Total:</span><span>{{ cart.get_total_price|naira }}</span></div>
     <a href="{% url 'orders:order_create' %}" class="btn btn-primary btn-block">Proceed to Checkout</a>
     <a href="{% url 'products:home' %}" class="btn btn-outline btn-block" style="margin-top:8px;">Continue Shopping</a>
   </div>

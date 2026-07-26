@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load currency_filters %}
 {% block title %}Your Orders — Corazon Marketplace{% endblock %}
 
 {% block content %}
@@ -16,10 +17,10 @@
     </div>
     <ul>
       {% for item in order.items.all %}
-        <li>{{ item.product_name }} &times; {{ item.quantity }} — ${{ item.get_cost }}</li>
+        <li>{{ item.product_name }} &times; {{ item.quantity }} — {{ item.get_cost|naira }}</li>
       {% endfor %}
     </ul>
-    <strong>Total: ${{ order.get_total_cost }}</strong>
+    <strong>Total: {{ order.get_total_cost|naira }}</strong>
   </div>
 {% empty %}
   <p>You haven't placed any orders yet. <a href="{% url 'products:home' %}">Start shopping</a>.</p>

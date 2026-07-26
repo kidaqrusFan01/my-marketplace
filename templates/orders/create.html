@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load currency_filters %}
 {% block title %}Checkout — Corazon Marketplace{% endblock %}
 
 {% block content %}
@@ -22,10 +23,10 @@
   <div class="cart-summary">
     <h3>Order Summary</h3>
     {% for item in cart %}
-      <div class="total-line"><span>{{ item.product.name }} &times; {{ item.quantity }}</span><span>${{ item.total_price }}</span></div>
+      <div class="total-line"><span>{{ item.product.name }} &times; {{ item.quantity }}</span><span>{{ item.total_price|naira }}</span></div>
     {% endfor %}
     <hr>
-    <div class="total-line grand-total"><span>Total:</span><span>${{ cart.get_total_price }}</span></div>
+    <div class="total-line grand-total"><span>Total:</span><span>{{ cart.get_total_price|naira }}</span></div>
   </div>
 </div>
 {% endblock %}

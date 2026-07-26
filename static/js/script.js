@@ -100,14 +100,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // Desktop fallback: toggle our own dropdown of platform links.
-      const isOpen = !shareMenu.hidden;
-      shareMenu.hidden = isOpen;
+      const isOpen = shareMenu.classList.contains('open');
+      shareMenu.classList.toggle('open', !isOpen);
       shareBtn.setAttribute('aria-expanded', String(!isOpen));
     });
 
     document.addEventListener('click', function (e) {
-      if (!shareMenu.hidden && !shareMenu.contains(e.target) && e.target !== shareBtn) {
-        shareMenu.hidden = true;
+      if (shareMenu.classList.contains('open') && !shareMenu.contains(e.target) && e.target !== shareBtn) {
+        shareMenu.classList.remove('open');
         shareBtn.setAttribute('aria-expanded', 'false');
       }
     });

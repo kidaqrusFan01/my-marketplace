@@ -1,3 +1,4 @@
+{% load currency_filters %}
 <div class="product-card">
   <a href="{{ product.get_absolute_url }}" class="thumb">
     {% if product.image %}
@@ -9,8 +10,8 @@
   <div class="body">
     <a href="{{ product.get_absolute_url }}" class="title">{{ product.name }}</a>
     <div class="price">
-      ${{ product.current_price }}
-      {% if product.discount_price %}<span class="old-price">${{ product.price }}</span>{% endif %}
+      {{ product.current_price|naira }}
+      {% if product.discount_price %}<span class="old-price">{{ product.price|naira }}</span>{% endif %}
     </div>
     {% if product.in_stock %}
       <span class="stock-status in">In stock</span>

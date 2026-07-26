@@ -22,6 +22,11 @@
     <span class="job-tag">{{ job.get_job_type_display }}</span>
     <h3><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></h3>
     <p class="helptext">{{ job.department }} &middot; {{ job.location }} &middot; Posted {{ job.posted_at|date:"M d, Y" }}</p>
+    <div class="job-meta-row">
+      <span class="job-meta-item">&#128176; {{ job.salary_display }}</span>
+      <span class="job-meta-item">&#128197; {{ job.work_days }}</span>
+      <span class="job-meta-item">&#128337; {{ job.work_hours }}</span>
+    </div>
     <p>{{ job.description|truncatewords:30 }}</p>
     <a href="{{ job.get_absolute_url }}" class="btn btn-primary">View &amp; Apply</a>
   </div>
