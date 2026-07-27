@@ -22,7 +22,7 @@
     <div class="buy-box">
       <div class="price">
         {{ product.current_price|naira }}
-        {% if product.discount_price %}<span class="old-price" style="text-decoration:line-through;color:#565959;">{{ product.price|naira }}</span>{% endif %}
+        {% if product.discount_price %}<span class="old-price" style="text-decoration:line-through;color:var(--text-muted);">{{ product.price|naira }}</span>{% endif %}
       </div>
       {% if product.in_stock %}
         <p class="stock-status in">In Stock ({{ product.stock }} available)</p>
