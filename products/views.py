@@ -4,12 +4,27 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .models import Product, Category, Review, HeroBanner
+from .models import Product, Category, Review, HeroBanner, DealOfTheDay
 from .forms import ProductForm, ReviewForm
 
 
 def is_seller(user):
     return user.is_authenticated and user.is_seller
+
+
+def build_referral_share_url(request, path):
+    """
+    Absolute URL for `path`, tagged with the current user's referral code
+    (?ref=CODE) so anyone who clicks a shared link and later buys something
+    can be credited back to them — see accounts.middleware and
+    loyalty.views.track_share. Anonymous visitors get a plain link with no
+    ref tag (nothing to attribute the share to).
+    """
+    url = request.build_absolute_uri(path)
+    if request.user.is_authenticated:
+        separator = '&' if '?' in url else '?'
+        url = f"{url}{separator}ref={request.user.referral_code}"
+    return url
 
 
 # Fallback content used ONLY if no HeroBanner rows exist yet (e.g. right
@@ -87,12 +102,16 @@ def home(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    current_deal = DealOfTheDay.get_current()
+
     context = {
         'page_obj': page_obj,
         'categories': categories,
         'featured_products': featured_products,
         'query': query,
         'selected_category': category_slug,
+        'current_deal': current_deal,
+        'deal_share_url': build_referral_share_url(request, current_deal.product.get_absolute_url()) if current_deal else None,
         'hero_slides': get_hero_slides(),
     }
     return render(request, 'products/home.html', context)
@@ -104,6 +123,9 @@ def product_detail(request, slug):
     related_products = Product.objects.filter(
         category=product.category, is_active=True
     ).exclude(pk=product.pk)[:4]
+
+    from loyalty.services import product_is_current_deal
+    is_deal_of_day = product_is_current_deal(product)
 
     review_form = None
     if request.user.is_authenticated:
@@ -127,7 +149,8 @@ def product_detail(request, slug):
         'reviews': reviews,
         'related_products': related_products,
         'review_form': review_form,
-        'share_url': request.build_absolute_uri(product.get_absolute_url()),
+        'share_url': build_referral_share_url(request, product.get_absolute_url()),
+        'is_deal_of_day': is_deal_of_day,
     }
     return render(request, 'products/product_detail.html', context)
 

@@ -15,7 +15,29 @@
       {% endfor %}
     </tbody>
   </table>
-  <p style="font-size:18px; font-weight:700;">Total: {{ order.get_total_cost|naira }}</p>
-  <a href="{% url 'products:home' %}" class="btn btn-primary">Continue Shopping</a>
+  <div style="max-width:320px; margin:0 auto; text-align:left;">
+    <div class="total-line"><span>Subtotal:</span><span>{{ order.get_subtotal|naira }}</span></div>
+    {% if order.loyalty_points_redeemed %}
+      <div class="total-line" style="color:var(--success);">
+        <span>Loyalty points redeemed ({{ order.loyalty_points_redeemed }} pts):</span>
+        <span>-{{ order.loyalty_discount_amount|naira }}</span>
+      </div>
+    {% endif %}
+    <div class="total-line grand-total"><span>Total:</span><span>{{ order.get_total_cost|naira }}</span></div>
+  </div>
+
+  {% if order.loyalty_transactions.all %}
+    <div class="card" style="background:var(--bg); box-shadow:none; margin-top:16px;">
+      <p style="margin:0;">&#127942; <strong>Loyalty points earned on this order:</strong></p>
+      {% for txn in order.loyalty_transactions.all %}
+        {% if txn.points > 0 %}
+          <p style="margin:4px 0; font-size:13px;">+{{ txn.points }} — {{ txn.get_reason_display }}</p>
+        {% endif %}
+      {% endfor %}
+      <p style="margin-top:8px;"><a href="{% url 'loyalty:wallet' %}">View your loyalty wallet &rarr;</a></p>
+    </div>
+  {% endif %}
+
+  <a href="{% url 'products:home' %}" class="btn btn-primary" style="margin-top:16px;">Continue Shopping</a>
 </div>
 {% endblock %}

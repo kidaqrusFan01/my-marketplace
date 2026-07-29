@@ -22,14 +22,26 @@ class Order(models.Model):
     postal_code = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=20)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    # Loyalty points applied as a discount at checkout (see loyalty app).
+    # Stored on the order itself (rather than only as a LoyaltyTransaction)
+    # so the receipt/history always shows exactly what was redeemed here,
+    # even if the transaction ledger is queried differently later.
+    loyalty_points_redeemed = models.PositiveIntegerField(default=0)
+    loyalty_discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
 
-    def get_total_cost(self):
+    def get_subtotal(self):
         return sum(item.get_cost() for item in self.items.all())
+
+    def get_total_cost(self):
+        total = self.get_subtotal() - self.loyalty_discount_amount
+        return total if total > 0 else 0
 
     def __str__(self):
         return f"Order #{self.pk} - {self.full_name}"

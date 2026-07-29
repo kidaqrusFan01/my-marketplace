@@ -7,7 +7,28 @@ from django.views.generic import CreateView, UpdateView
 from django.urls import reverse_lazy
 
 from .forms import CustomerSignUpForm, SellerSignUpForm, ProfileUpdateForm
+from .models import CustomUser
 from orders.models import Order
+
+
+def _attach_referrer(request, new_user):
+    """
+    If this browser session arrived via someone's referral link
+    (?ref=CODE, captured by ReferralTrackingMiddleware), link the new
+    account to that referrer. No points are awarded here — only a real
+    purchase earns the referrer loyalty points (see orders.views), so a
+    fake signup alone can't be used to farm points.
+    """
+    ref_code = request.session.get('referral_code')
+    if not ref_code:
+        return
+    referrer = CustomUser.objects.filter(referral_code=ref_code).exclude(pk=new_user.pk).first()
+    if referrer:
+        new_user.referred_by = referrer
+        new_user.save(update_fields=['referred_by'])
+    # One-time use: don't keep crediting every future signup in this
+    # browser session to the same referral link.
+    del request.session['referral_code']
 
 
 class CustomerSignUpView(CreateView):
@@ -22,6 +43,7 @@ class CustomerSignUpView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        _attach_referrer(self.request, self.object)
         login(self.request, self.object)
         messages.success(self.request, "Welcome to Corazon Marketplace! Your account was created.")
         return response
@@ -39,6 +61,7 @@ class SellerSignUpView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        _attach_referrer(self.request, self.object)
         login(self.request, self.object)
         messages.success(self.request, "Welcome, seller! You can now list products from your dashboard.")
         return response

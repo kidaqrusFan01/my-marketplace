@@ -20,6 +20,9 @@
     <!-- Price + Add to Cart appear immediately, above the description,
          so shoppers can buy without scrolling past product copy first. -->
     <div class="buy-box">
+      {% if is_deal_of_day %}
+        <span class="deal-badge" style="margin-bottom:10px;">&#9889; Today's Deal — bonus points!</span>
+      {% endif %}
       <div class="price">
         {{ product.current_price|naira }}
         {% if product.discount_price %}<span class="old-price" style="text-decoration:line-through;color:var(--text-muted);">{{ product.price|naira }}</span>{% endif %}
@@ -44,12 +47,15 @@
           Add to Cart
         </button>
       </form>
+      <p class="deal-loyalty-hint" style="color:var(--text-muted); margin:10px 0 0;">
+        &#127942; Earn loyalty points buying or sharing this{% if is_deal_of_day %} — doubled today!{% endif %}
+      </p>
     </div>
 
     <!-- Share button -->
     <div class="share-widget">
       <button type="button" class="btn btn-outline btn-sm share-toggle" id="shareToggleBtn"
-              data-share-url="{{ share_url }}" data-share-title="{{ product.name }}"
+              data-share-url="{{ share_url }}" data-share-title="{{ product.name }}" data-product-id="{{ product.id }}"
               aria-haspopup="true" aria-expanded="false">
         &#128257; Share
       </button>

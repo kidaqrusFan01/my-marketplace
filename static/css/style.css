@@ -743,8 +743,136 @@ footer a { color: var(--white); }
 .badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
 .badge.active { background: #d4edda; color: #155724; }
 .badge.inactive { background: #f8d7da; color: #721c24; }
+.badge.pending { background: #fff3cd; color: #8a6100; }
 
 .star-rating { color: var(--orange); }
+
+/* ---------------- Deal of the Day ---------------- */
+.deal-of-day { display: flex; justify-content: center; margin: 0 0 28px; }
+.deal-card {
+  width: 100%;
+  max-width: 900px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  color: var(--white);
+}
+.deal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 22px;
+  background: rgba(255,255,255,0.06);
+}
+.deal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--orange);
+  color: var(--navy-dark);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+}
+.deal-countdown { display: flex; gap: 8px; align-items: center; }
+.countdown-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  min-width: 42px;
+}
+.cd-val { font-family: var(--font-heading); font-size: 16px; font-weight: 700; }
+.cd-label { font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+.cd-ended { font-weight: 700; color: var(--yellow-badge); }
+
+.deal-body { display: flex; gap: 24px; padding: 24px; align-items: center; flex-wrap: wrap; }
+.deal-image {
+  width: 220px;
+  height: 220px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deal-image img { width: 100%; height: 100%; object-fit: cover; }
+.deal-info { flex: 1; min-width: 220px; }
+.deal-title { color: var(--white); font-family: var(--font-heading); font-size: 22px; font-weight: 600; display: block; margin-bottom: 10px; }
+.deal-price-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.deal-price { font-family: var(--font-heading); font-size: 30px; font-weight: 700; color: var(--yellow-badge); }
+.deal-original-price { text-decoration: line-through; color: rgba(255,255,255,0.5); font-size: 15px; }
+.deal-savings { background: #ff4757; color: var(--white); font-weight: 700; font-size: 12px; padding: 3px 10px; border-radius: var(--radius-pill); }
+.deal-loyalty-hint { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 16px; }
+.deal-actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; }
+.deal-actions .share-menu { color: var(--text-dark); }
+
+/* ---------------- Loyalty wallet ---------------- */
+.loyalty-nav-badge { background: rgba(255,255,255,0.08); border-radius: var(--radius-pill); }
+.loyalty-balance-card {
+  background: linear-gradient(120deg, var(--navy-dark), var(--navy-mid));
+  color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.loyalty-balance-label { display: block; font-size: 13px; color: rgba(255,255,255,0.7); }
+.loyalty-balance-value { display: block; font-family: var(--font-heading); font-size: 34px; font-weight: 700; margin: 2px 0; }
+.loyalty-balance-card .helptext { color: rgba(255,255,255,0.6); }
+.loyalty-balance-stats { display: flex; gap: 28px; }
+.loyalty-balance-stats .stat-value { display: block; font-size: 20px; font-weight: 700; text-align: center; }
+.loyalty-balance-stats .stat-label { display: block; font-size: 11px; color: rgba(255,255,255,0.65); text-align: center; }
+
+.referral-link-box { display: flex; gap: 8px; }
+.referral-link-box input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: var(--bg);
+}
+
+.loyalty-explainer { padding-left: 20px; margin: 8px 0 0; }
+.loyalty-explainer li { margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
+
+.loyalty-redeem-box {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin: 16px 0;
+}
+.loyalty-redeem-box label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; }
+.loyalty-redeem-box input[type="number"] {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.redemption-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
 
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
@@ -781,6 +909,20 @@ footer a { color: var(--white); }
   .btn-sm { min-height: 36px; padding: 7px 14px; }
   .hamburger-btn, .cart-link { min-height: 44px; display: flex; align-items: center; }
   .detail-image, .buy-box, .cart-summary, .form-box, .job-card, .card { border-radius: var(--radius-lg); }
+
+  /* Deal of the Day: stack image above info, shrink countdown boxes */
+  .deal-body { flex-direction: column; text-align: center; padding: 18px; }
+  .deal-image { width: 180px; height: 180px; }
+  .deal-price-row { justify-content: center; }
+  .deal-actions { justify-content: center; }
+  .deal-header { justify-content: center; text-align: center; }
+  .countdown-box { min-width: 36px; padding: 4px 8px; }
+
+  /* Loyalty wallet: balance card and referral box stack cleanly */
+  .loyalty-balance-card { flex-direction: column; text-align: center; align-items: center; }
+  .loyalty-balance-stats { justify-content: center; }
+  .referral-link-box { flex-direction: column; }
+  .referral-link-box input { width: 100%; }
 }
 
 /* Very small phones: tighten the top bar so nothing overflows/wraps

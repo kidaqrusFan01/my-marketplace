@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load currency_filters %}
 {% block title %}Corazon Marketplace — Shop Everything{% endblock %}
 
 {% block content %}
@@ -65,6 +66,65 @@
       {% endfor %}
     </div>
   </section>
+
+  {% if current_deal %}
+    <section class="deal-of-day" aria-label="Deal of the Day">
+      <div class="deal-card">
+        <div class="deal-header">
+          <span class="deal-badge">&#9889; Deal of the Day</span>
+          <div class="deal-countdown" id="dealCountdown" data-ends-at="{{ current_deal.ends_at|date:'c' }}">
+            <span class="countdown-box"><span class="cd-val" id="cdHours">--</span><span class="cd-label">hrs</span></span>
+            <span class="countdown-box"><span class="cd-val" id="cdMinutes">--</span><span class="cd-label">min</span></span>
+            <span class="countdown-box"><span class="cd-val" id="cdSeconds">--</span><span class="cd-label">sec</span></span>
+          </div>
+        </div>
+
+        <div class="deal-body">
+          <a href="{{ current_deal.product.get_absolute_url }}" class="deal-image">
+            {% if current_deal.product.image %}
+              <img src="{{ current_deal.product.image.url }}" alt="{{ current_deal.product.name }}" width="280" height="280" loading="lazy">
+            {% else %}
+              <img src="https://placehold.co/280x280?text={{ current_deal.product.name|urlencode }}" alt="{{ current_deal.product.name }}" width="280" height="280" loading="lazy">
+            {% endif %}
+          </a>
+
+          <div class="deal-info">
+            <a href="{{ current_deal.product.get_absolute_url }}" class="deal-title">{{ current_deal.product.name }}</a>
+            <div class="deal-price-row">
+              <span class="deal-price">{{ current_deal.deal_price|naira }}</span>
+              <span class="deal-original-price">{{ current_deal.product.price|naira }}</span>
+              {% if current_deal.savings_percent > 0 %}
+                <span class="deal-savings">-{{ current_deal.savings_percent }}%</span>
+              {% endif %}
+            </div>
+            <p class="deal-loyalty-hint">&#127942; Earn bonus loyalty points buying or sharing this deal!</p>
+            <div class="deal-actions">
+              <form action="{% url 'cart:cart_add' current_deal.product.id %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-primary" {% if not current_deal.product.in_stock %}disabled{% endif %}>
+                  Add to Cart
+                </button>
+              </form>
+              <button type="button" class="btn btn-outline share-toggle" id="shareToggleBtn"
+                      data-share-url="{{ deal_share_url }}"
+                      data-share-title="{{ current_deal.product.name }}"
+                      data-product-id="{{ current_deal.product.id }}"
+                      aria-haspopup="true" aria-expanded="false">
+                &#128257; Share
+              </button>
+              <div class="share-menu" id="shareMenu">
+                <a href="https://twitter.com/intent/tweet?url={{ deal_share_url|urlencode }}&text={{ current_deal.product.name|urlencode }}" target="_blank" rel="noopener noreferrer">Share on X / Twitter</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ deal_share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+                <a href="https://api.whatsapp.com/send?text={{ current_deal.product.name|urlencode }}%20{{ deal_share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                <button type="button" class="share-copy-btn" data-copy-url="{{ deal_share_url }}">Copy Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
 
   {% if not query and not selected_category %}
     <h2 class="section-title">Featured Products</h2>

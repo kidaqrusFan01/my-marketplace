@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.utils import timezone
 from django.utils.html import format_html
-from .models import Category, Product, ProductImage, Review, HeroBanner
+from .models import Category, Product, ProductImage, Review, HeroBanner, DealOfTheDay
 
 
 class ProductImageInline(admin.TabularInline):
@@ -78,3 +79,22 @@ class HeroBannerAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" style="height:40px;border-radius:4px;">', obj.image.url)
         return "(no image — using placeholder)"
     preview.short_description = "Image"
+
+
+@admin.register(DealOfTheDay)
+class DealOfTheDayAdmin(admin.ModelAdmin):
+    list_display = ('product', 'deal_price', 'starts_at', 'ends_at', 'status', 'is_active')
+    list_filter = ('is_active',)
+    autocomplete_fields = []
+    search_fields = ('product__name',)
+
+    def status(self, obj):
+        if not obj.is_active:
+            return "Inactive"
+        now = timezone.now()
+        if now < obj.starts_at:
+            return "Upcoming"
+        if now > obj.ends_at:
+            return "Ended"
+        return "🔴 LIVE NOW"
+    status.short_description = "Status"

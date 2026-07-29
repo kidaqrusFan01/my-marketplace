@@ -24,10 +24,17 @@ section where applicants can apply for jobs.
   edit, and delete their own products, PLUS scoped access to the full Django admin
   (`/admin/`) where they can only ever see and manage *their own* products (never other
   sellers' or platform data).
-- **Careers / Jobs** — public job listings filterable by type, and a job application form
-  with resume upload (PDF/DOC/DOCX, 5MB max).
+- **Careers / Jobs** — public job listings filterable by type, with salary, work days, and
+  work hours shown; job application form with resume upload (PDF/DOC/DOCX, 5MB max).
+- **Loyalty Coin** — customers and sellers earn points for purchases and for sharing
+  products via a personal referral link, with bigger bonuses when a shared link brings in
+  a new buyer. Points redeem for an order discount, a delivery-fee credit, or a
+  staff-reviewed request to convert to airtime/data/cash.
+- **Deal of the Day** — an admin-scheduled, time-boxed featured deal shown front-and-center
+  on the homepage with a live countdown; buying or sharing it earns bonus loyalty points.
 - **Superuser admin** — full Django admin access to every model (users, products, orders,
-  jobs, applications, reviews) for the site owner.
+  jobs, applications, reviews, loyalty accounts/transactions, redemption requests) for the
+  site owner.
 
 ---
 
@@ -76,12 +83,27 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Database — already set up and seeded!
+### 3. Database — run migrations this time (important!)
 
-To make this easy to test immediately, this zip **includes a ready-to-use `db.sqlite3`**
-already migrated and pre-loaded with demo data: 6 categories, 12 demo products, 4 job
-postings, a demo seller account, and a superuser account. You can skip straight to
-step 6 (`runserver`) and start clicking around.
+> ⚠️ **This update adds new database tables and columns** (Loyalty Coin, Deal of the
+> Day, referral tracking). Unlike previous versions of this project, the `db.sqlite3`
+> shipped in this zip has **not** been migrated to match them — running the app without
+> migrating first will throw errors like `no such table: loyalty_loyaltyaccount` or
+> `no such column: accounts_customuser.referred_by`.
+
+Run this before anything else:
+
+```bash
+python manage.py migrate
+```
+
+That's it — your existing demo products, seller, and superuser accounts are preserved;
+this only adds the new tables/columns on top of them. If you want the new features
+populated with demo data too (a live Deal of the Day, etc.), also run:
+
+```bash
+python manage.py seed_demo_data
+```
 
 **Default logins (change these before any real/public use):**
 
@@ -148,6 +170,44 @@ Visit:
 | Job listings | `/jobs/` — filter by job type |
 | Job application | Open any job, fill out the form and upload a resume (PDF/DOC/DOCX) |
 | Mobile sidebar | Resize your browser below ~900px width (or open on a phone) and tap the ☰ icon top-left |
+| Loyalty wallet | Log in, then visit `/loyalty/wallet/` (or tap 🪙 in the nav) — balance, referral link, points history, redemption form |
+| Earn points by sharing | Open any product, click Share, then click an actual platform link or "Copy Link" (opening the menu alone doesn't award points — only a completed share does) |
+| Earn points via referral | Copy your referral link from the wallet page, open it in a private/incognito window, sign up as a new account, then place an order from that account — check the *original* account's wallet for the referral + new-buyer bonus |
+| Redeem points at checkout | Add points to your account first (buy something, or share a few products), then at checkout enter a points amount in "Redeem loyalty points" |
+| Redeem for airtime/data/cash | From the wallet page (needs 100+ points), submit a redemption request, then approve/reject it from `/admin/` → Loyalty Coin → Redemption requests |
+| Deal of the Day | Visible automatically on `/` if `seed_demo_data` was run (see below) — or create/edit one at `/admin/` → Products → Deals of the Day |
+
+---
+
+## Loyalty Coin — how the economy works
+
+All the point values live in one file, `loyalty/constants.py`, so you can retune the
+whole economy without hunting through views:
+
+| Action | Points |
+|---|---|
+| Spend money (any purchase) | 1 point per ₦100 spent |
+| Share a product's link (max once per product per day) | 20 points |
+| Someone you referred makes their first purchase | 200 points |
+| ...and that purchase was their very first order ever (new buyer) | +300 points |
+| Buying or sharing the current Deal of the Day | All of the above, doubled |
+
+**Redemption**: 1 point = ₦1. Points can be applied as a discount at checkout instantly
+(no approval needed — it's just money off an order you're already placing). Converting
+points to **airtime, a data bundle, or cash** is different: this project doesn't wire up
+a live telco/payment API (that needs real provider credentials and isn't something to
+fake), so those requests land in a `pending` queue at `/admin/` → Loyalty Coin →
+Redemption requests, for a staff member to actually fulfill and mark complete — the same
+way a small business would handle it by hand before automating it later. Points are
+deducted the moment the request is submitted and automatically refunded if you reject one
+from admin.
+
+**Referral links**: every user (customer or seller) gets a permanent code
+(`user.referral_code`), and any page visited with `?ref=CODE` in the URL remembers it for
+that browser session — so sharing a specific product's link still attributes a signup to
+the right referrer. A dedicated "seller agent" referral dashboard (with e.g. marketing
+materials, richer analytics) was mentioned as a future page and isn't built yet — the
+underlying point/referral system above is ready for it to plug into whenever you are.
 
 ---
 

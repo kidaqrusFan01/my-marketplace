@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load currency_filters %}
+{% block title %}Your Loyalty Coin — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<h1>&#129689; Your Loyalty Coin</h1>
+
+<div class="loyalty-balance-card">
+  <div>
+    <span class="loyalty-balance-label">Current balance</span>
+    <span class="loyalty-balance-value">{{ account.balance }} pts</span>
+    <span class="helptext">&asymp; {{ account.balance|naira }} in redemption value</span>
+  </div>
+  <div class="loyalty-balance-stats">
+    <div><span class="stat-value">{{ account.lifetime_earned }}</span><span class="stat-label">Lifetime earned</span></div>
+    <div><span class="stat-value">{{ account.lifetime_redeemed }}</span><span class="stat-label">Lifetime redeemed</span></div>
+  </div>
+</div>
+
+<div class="two-col-layout">
+  <div class="card">
+    <h2>Your Referral Link</h2>
+    <p>Share this link — the more you share, the more points you earn. Bring in a new buyer and you earn even more.</p>
+    <div class="referral-link-box">
+      <input type="text" readonly value="{{ referral_url }}" id="referralLinkInput" onclick="this.select();">
+      <button type="button" class="btn btn-primary btn-sm" id="copyReferralBtn" data-copy-url="{{ referral_url }}">Copy</button>
+    </div>
+
+    <h3 style="margin-top:24px;">How it works</h3>
+    <ul class="loyalty-explainer">
+      <li><strong>Share a product or your referral link</strong> — earn points every time you share (once per product per day).</li>
+      <li><strong>Someone buys through your link</strong> — earn a bigger bonus.</li>
+      <li><strong>That buyer is brand new to Corazon</strong> — earn an extra new-buyer bonus on top.</li>
+      <li><strong>You buy something yourself</strong> — earn points on every purchase.</li>
+      <li><strong>Deal of the Day</strong> — sharing or buying today's deal earns bonus multiplied points.</li>
+    </ul>
+
+    <h3>How to use your points</h3>
+    <ul class="loyalty-explainer">
+      <li>Get a discount on products at checkout</li>
+      <li>Pay for delivery of items you buy</li>
+      <li>Convert to mobile airtime or a data bundle</li>
+      <li>Convert to cash (bank transfer)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Redeem Points</h2>
+    {% if account.balance < min_redemption_points %}
+      <p class="helptext">You need at least {{ min_redemption_points }} points to redeem for airtime, data, or cash. Keep earning — you're at {{ account.balance }} now.</p>
+    {% else %}
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+        <p class="helptext">1 point = {{ point_value_naira|naira }}. Requests are reviewed and fulfilled by our team — this isn't instant, the same way a small business would process it by hand before automating.</p>
+        <button type="submit" class="btn btn-primary btn-block">Submit Redemption Request</button>
+      </form>
+    {% endif %}
+
+    {% if redemption_requests %}
+      <h3 style="margin-top:24px;">Your Redemption Requests</h3>
+      {% for req in redemption_requests %}
+        <div class="redemption-row">
+          <span>{{ req.get_redemption_type_display }} — {{ req.points_used }} pts ({{ req.naira_value|naira }})</span>
+          <span class="badge {% if req.status == 'completed' %}active{% elif req.status == 'rejected' %}inactive{% else %}pending{% endif %}">{{ req.get_status_display }}</span>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<h2 class="section-title">Points History</h2>
+<div class="card" style="overflow-x:auto;">
+  <table class="dash-table">
+    <thead>
+      <tr><th>Date</th><th>Reason</th><th>Points</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      {% for txn in transactions %}
+        <tr>
+          <td>{{ txn.created_at|date:"M d, Y" }}</td>
+          <td>{{ txn.get_reason_display }}</td>
+          <td style="color: {% if txn.points > 0 %}var(--success){% else %}var(--price-red){% endif %}; font-weight:600;">
+            {% if txn.points > 0 %}+{% endif %}{{ txn.points }}
+          </td>
+          <td>{{ txn.note }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No activity yet — share a product or make a purchase to start earning points!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const copyBtn = document.getElementById('copyReferralBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        const url = copyBtn.dataset.copyUrl;
+        const originalText = copyBtn.textContent;
+        navigator.clipboard.writeText(url).then(function () {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function () { copyBtn.textContent = originalText; }, 2000);
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

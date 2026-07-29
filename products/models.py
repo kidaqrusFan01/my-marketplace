@@ -174,3 +174,60 @@ class HeroBanner(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class DealOfTheDay(models.Model):
+    """
+    A single featured product shown prominently at the center of the
+    homepage for a limited window (starts_at -> ends_at). Buying or
+    sharing whichever product is the CURRENT deal earns bonus loyalty
+    points — see loyalty.constants.DEAL_OF_DAY_MULTIPLIER and
+    DEAL_OF_DAY_PURCHASE_BONUS, and loyalty.views/orders.views for where
+    that bonus actually gets applied.
+
+    Only one deal is ever "live" at a time in practice (the homepage shows
+    whichever active deal's window contains the current moment, soonest
+    start first) but nothing stops an admin from scheduling several deals
+    back-to-back for different days.
+    """
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='deals')
+    deal_price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        help_text="Special price for the duration of the deal. Should normally be lower than the product's regular price."
+    )
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Turn off to pull a deal early without deleting its record."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['starts_at']
+        verbose_name = "Deal of the Day"
+        verbose_name_plural = "Deals of the Day"
+
+    @property
+    def is_live(self):
+        from django.utils import timezone
+        now = timezone.now()
+        return self.is_active and self.starts_at <= now <= self.ends_at
+
+    @property
+    def savings_percent(self):
+        if not self.product.price or self.product.price <= 0:
+            return 0
+        return round((1 - (self.deal_price / self.product.price)) * 100)
+
+    @classmethod
+    def get_current(cls):
+        """Returns the deal that's live right now, or None."""
+        from django.utils import timezone
+        now = timezone.now()
+        return cls.objects.filter(
+            is_active=True, starts_at__lte=now, ends_at__gte=now
+        ).select_related('product', 'product__category').order_by('starts_at').first()
+
+    def __str__(self):
+        return f"Deal: {self.product.name} ({self.starts_at:%b %d %H:%M} - {self.ends_at:%b %d %H:%M})"

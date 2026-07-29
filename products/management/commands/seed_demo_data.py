@@ -1,13 +1,16 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from products.models import Category, Product
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+from products.models import Category, Product, DealOfTheDay
 from jobs.models import JobPosting
 
 User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Seeds the database with demo categories, a demo seller, demo products, and job postings."
+    help = "Seeds the database with demo categories, a demo seller, demo products, jobs, and a Deal of the Day."
 
     def handle(self, *args, **options):
         # --- Demo seller account ---
@@ -135,4 +138,21 @@ class Command(BaseCommand):
             if created:
                 job_created += 1
         self.stdout.write(self.style.SUCCESS(f"Created {job_created} demo job postings."))
+
+        # --- Deal of the Day ---
+        # A 24-hour window centered on "now" so the deal is always live
+        # immediately after seeding, regardless of when you run this.
+        deal_product = Product.objects.filter(name='Wireless Bluetooth Headphones').first()
+        if deal_product and not DealOfTheDay.objects.filter(product=deal_product, is_active=True).exists():
+            DealOfTheDay.objects.create(
+                product=deal_product,
+                deal_price=deal_product.price * Decimal('0.6'),
+                starts_at=timezone.now() - timedelta(hours=1),
+                ends_at=timezone.now() + timedelta(hours=23),
+                is_active=True,
+            )
+            self.stdout.write(self.style.SUCCESS(
+                f"Created a live Deal of the Day on '{deal_product.name}' (visible on the homepage now)."
+            ))
+
         self.stdout.write(self.style.SUCCESS("Demo data seeding complete!"))

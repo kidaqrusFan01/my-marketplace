@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'cart',
     'orders',
     'jobs',
+    'loyalty',
 ]
 
 MIDDLEWARE = [
@@ -45,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.ReferralTrackingMiddleware',
 ]
 
 ROOT_URLCONF = 'corazon.urls'
@@ -62,6 +64,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart_summary',
                 'products.context_processors.all_categories',
+                'loyalty.context_processors.loyalty_balance',
             ],
         },
     },

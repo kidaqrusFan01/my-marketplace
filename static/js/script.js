@@ -82,9 +82,31 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ---------------- Product share button ----------------
+  function getCookie(name) {
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
+  }
+
+  function trackShare(productId) {
+    // Best-effort: awards loyalty points server-side for sharing. Only
+    // called when we know the visitor is logged in (the endpoint requires
+    // it) and never blocks the actual share action if it fails/is slow.
+    if (!productId || !window.CORAZON || !window.CORAZON.isAuthenticated) return;
+    fetch('/loyalty/track-share/' + productId + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') },
+      keepalive: true,
+    }).catch(function () {
+      // Silently ignore — sharing itself already happened via the browser
+      // share sheet / platform link, points are a bonus, not the point.
+    });
+  }
+
   const shareBtn = document.getElementById('shareToggleBtn');
   const shareMenu = document.getElementById('shareMenu');
   if (shareBtn && shareMenu) {
+    const productId = shareBtn.dataset.productId;
+
     shareBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       const url = shareBtn.dataset.shareUrl;
@@ -93,8 +115,10 @@ document.addEventListener('DOMContentLoaded', function () {
       // On phones/tablets that support it, use the native share sheet
       // (Messages, WhatsApp, Instagram, etc. all show up automatically).
       if (navigator.share) {
-        navigator.share({ title: title, url: url }).catch(function () {
-          // User cancelled the native share sheet — no action needed.
+        navigator.share({ title: title, url: url }).then(function () {
+          trackShare(productId);
+        }).catch(function () {
+          // User cancelled the native share sheet — no points, no action needed.
         });
         return;
       }
@@ -112,6 +136,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
+    // Any real platform link (X, Facebook, WhatsApp, LinkedIn, Email) counts
+    // as a completed share the moment it's clicked.
+    shareMenu.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        trackShare(productId);
+      });
+    });
+
     const copyBtn = shareMenu.querySelector('.share-copy-btn');
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
@@ -120,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
         navigator.clipboard.writeText(url).then(function () {
           copyBtn.textContent = 'Link copied!';
           copyBtn.classList.add('copied');
+          trackShare(productId);
           setTimeout(function () {
             copyBtn.textContent = originalText;
             copyBtn.classList.remove('copied');
@@ -127,6 +160,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
     }
+  }
+
+  // ---------------- Deal of the Day countdown ----------------
+  const countdownEl = document.getElementById('dealCountdown');
+  if (countdownEl) {
+    const endsAt = new Date(countdownEl.dataset.endsAt).getTime();
+    const hoursEl = document.getElementById('cdHours');
+    const minutesEl = document.getElementById('cdMinutes');
+    const secondsEl = document.getElementById('cdSeconds');
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tick() {
+      const diff = endsAt - Date.now();
+      if (diff <= 0) {
+        countdownEl.innerHTML = '<span class="cd-ended">Deal ended</span>';
+        clearInterval(timer);
+        return;
+      }
+      const totalSeconds = Math.floor(diff / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hoursEl) hoursEl.textContent = pad(hours);
+      if (minutesEl) minutesEl.textContent = pad(minutes);
+      if (secondsEl) secondsEl.textContent = pad(seconds);
+    }
+
+    tick();
+    const timer = setInterval(tick, 1000);
   }
 });
 

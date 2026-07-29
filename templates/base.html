@@ -37,6 +37,9 @@
         <a href="{% url 'orders:order_history' %}" class="nav-item hide-mobile">
           Returns<strong>&amp; Orders</strong>
         </a>
+        <a href="{% url 'loyalty:wallet' %}" class="nav-item loyalty-nav-badge hide-mobile" title="Loyalty Coin">
+          &#129689;<strong>{{ loyalty_points_balance }} pts</strong>
+        </a>
         <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;" class="hide-mobile">
           {% csrf_token %}
           <button type="submit" class="nav-item" style="background:none;border:none;cursor:pointer;">Sign Out</button>
@@ -97,6 +100,7 @@
       {% if user.is_authenticated %}
         <a href="{% url 'accounts:profile' %}">Profile</a>
         <a href="{% url 'orders:order_history' %}">Your Orders</a>
+        <a href="{% url 'loyalty:wallet' %}">&#129689; Loyalty Coin ({{ loyalty_points_balance }} pts)</a>
         {% if user.is_seller %}
           <a href="{% url 'products:seller_dashboard' %}">Seller Dashboard</a>
           <a href="{% url 'products:product_create' %}">Add a Product</a>
@@ -148,6 +152,14 @@
     <p>&copy; {% now "Y" %} Corazon Marketplace. All rights reserved. (Demo project)</p>
   </footer>
 
+  <script>
+    // Small bits of server-side state the plain JS in script.js needs —
+    // e.g. so the share button knows whether it's safe to call the
+    // point-tracking endpoint (login required) without an extra request.
+    window.CORAZON = {
+      isAuthenticated: {{ request.user.is_authenticated|yesno:"true,false" }}
+    };
+  </script>
   <script src="{% static 'js/script.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>

@@ -7,15 +7,29 @@
 <div class="cart-layout">
   <div class="card">
     <h2>Shipping Information</h2>
-    <form method="post">
+    <form method="post" id="checkoutForm">
       {% csrf_token %}
       {% for field in form %}
-        <div class="form-group">
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
-        </div>
+        {% if field.name != 'points_to_redeem' %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+          </div>
+        {% endif %}
       {% endfor %}
+
+      {% if loyalty_balance > 0 %}
+        <div class="loyalty-redeem-box">
+          <label for="{{ form.points_to_redeem.id_for_label }}">
+            &#129689; Redeem loyalty points <span class="helptext">({{ loyalty_balance }} available)</span>
+          </label>
+          {{ form.points_to_redeem }}
+          <p class="helptext">{{ form.points_to_redeem.help_text }}</p>
+          {% for error in form.points_to_redeem.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+        </div>
+      {% endif %}
+
       <button type="submit" class="btn btn-primary btn-block">Place Order</button>
     </form>
   </div>
@@ -27,6 +41,9 @@
     {% endfor %}
     <hr>
     <div class="total-line grand-total"><span>Total:</span><span>{{ cart.get_total_price|naira }}</span></div>
+    {% if loyalty_balance > 0 %}
+      <p class="helptext" style="margin-top:8px;">Any points you redeem are applied after you place the order — check your confirmation page for the final total.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
