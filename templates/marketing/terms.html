@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Terms &amp; Conditions — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="content-page">
+  <h1>Terms &amp; Conditions</h1>
+  <p class="helptext">Last updated: {% now "F Y" %}</p>
+
+  <h2>1. Using Corazon Marketplace</h2>
+  <p>By creating an account or placing an order on Corazon Marketplace, you agree to
+  these terms. You must provide accurate account information and are responsible for
+  activity that happens under your account.</p>
+
+  <h2>2. Buyers</h2>
+  <p>Prices are listed in Nigerian Naira (₦) and set by individual sellers. Placing an
+  order is an offer to purchase, which the seller fulfills upon confirmation. Our
+  <a href="{% url 'marketing:returns' %}">Return Policy</a> governs returns and refunds.</p>
+
+  <h2>3. Sellers</h2>
+  <p>Sellers are responsible for the accuracy of their product listings (description,
+  price, stock, and images), for fulfilling orders promptly, and for complying with
+  applicable consumer protection laws. Corazon Marketplace provides the platform; the
+  contract of sale is between buyer and seller.</p>
+
+  <h2>4. Loyalty Coin</h2>
+  <p>Points earned through Loyalty Coin have no cash value until redeemed, are
+  non-transferable between accounts, and may be adjusted or revoked in cases of abuse
+  (e.g. fraudulent referrals). Redemptions for airtime, data, or cash are reviewed and
+  fulfilled by our team and are not instant.</p>
+
+  <h2>5. Advertising &amp; Job Postings</h2>
+  <p>Businesses that advertise on the site or post job openings via our
+  <a href="{% url 'marketing:advertise' %}">Advertise With Us</a> page are responsible for
+  the accuracy and legality of the content they submit. We reserve the right to decline
+  or remove any advertisement or job listing at our discretion.</p>
+
+  <h2>6. Limitation of Liability</h2>
+  <p>Corazon Marketplace is provided "as is." We are not liable for indirect, incidental,
+  or consequential damages arising from use of the platform, to the fullest extent
+  permitted by law.</p>
+
+  <h2>7. Changes to These Terms</h2>
+  <p>We may update these terms from time to time. Continued use of the site after a
+  change means you accept the updated terms.</p>
+
+  <p class="helptext" style="margin-top:32px;">
+    This page is placeholder legal text generated for demonstration purposes as part of
+    this project template — it is not legal advice. Have a qualified lawyer review and
+    adapt it before using it for a real, live store.
+  </p>
+</div>
+{% endblock %}

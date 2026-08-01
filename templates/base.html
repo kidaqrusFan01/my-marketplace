@@ -13,6 +13,18 @@
 </head>
 <body>
 
+  <!-- ============ PROMO TICKER ============ -->
+  <div class="promo-ticker" aria-label="Site announcements">
+    <div class="promo-ticker-track">
+      <span class="promo-ticker-item">🔥 Flash Sale — check today's Deal of the Day</span>
+      <span class="promo-ticker-item">🚚 Fast delivery options across Nigeria</span>
+      <span class="promo-ticker-item">🪙 Earn Loyalty Coin on every purchase &amp; share</span>
+      <span class="promo-ticker-item">🔥 Flash Sale — check today's Deal of the Day</span>
+      <span class="promo-ticker-item">🚚 Fast delivery options across Nigeria</span>
+      <span class="promo-ticker-item">🪙 Earn Loyalty Coin on every purchase &amp; share</span>
+    </div>
+  </div>
+
   <!-- ============ TOP NAVBAR ============ -->
   <header class="top-nav">
     <button class="hamburger-btn" id="sidebarOpenBtn" aria-label="Open menu">&#9776;</button>
@@ -61,6 +73,7 @@
   <div class="sub-nav">
     <a href="{% url 'products:home' %}">All</a>
     <a href="{% url 'jobs:job_list' %}">Careers</a>
+    <a href="{% url 'marketing:advertise' %}">📢 Advertise With Us</a>
     {% if user.is_authenticated and user.is_seller %}
       <a href="{% url 'products:product_create' %}">Sell a Product</a>
     {% elif not user.is_authenticated %}
@@ -68,6 +81,7 @@
     {% endif %}
     <a href="{% url 'orders:order_history' %}">Your Orders</a>
     <a href="/admin/">Admin</a>
+    <span class="live-indicator hide-mobile"><span class="live-dot"></span> Live</span>
   </div>
 
   <!-- ============ MOBILE SIDEBAR ============ -->
@@ -117,6 +131,9 @@
     <div class="sidebar-section">
       <h4>Help &amp; Careers</h4>
       <a href="{% url 'jobs:job_list' %}">Job Openings</a>
+      <a href="{% url 'marketing:advertise' %}">Advertise With Us</a>
+      <a href="{% url 'marketing:about' %}">About Us</a>
+      <a href="{% url 'marketing:returns' %}">Return Policy</a>
       <a href="{% url 'cart:cart_detail' %}">Your Cart</a>
       <a href="/admin/">Admin Panel</a>
     </div>
@@ -143,21 +160,45 @@
   <!-- ============ FOOTER ============ -->
   <div class="footer-top" onclick="window.scrollTo({top:0, behavior:'smooth'});">Back to top</div>
   <footer>
-    <p><strong>Corazon Marketplace</strong> &mdash; Your one-stop shop for everything.</p>
-    <p>
-      <a href="{% url 'jobs:job_list' %}">Careers</a> &middot;
-      <a href="{% url 'products:home' %}">Shop</a> &middot;
-      <a href="/admin/">Seller/Admin Login</a>
-    </p>
-    <p>&copy; {% now "Y" %} Corazon Marketplace. All rights reserved. (Demo project)</p>
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h4>Corazon Marketplace</h4>
+        <p class="helptext">Your one-stop shop for everything — electronics, fashion, home,
+        books, and more from independent sellers across Nigeria.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="{% url 'products:home' %}">All Products</a>
+        <a href="{% url 'cart:cart_detail' %}">Your Cart</a>
+        <a href="{% url 'orders:order_history' %}">Your Orders</a>
+        <a href="{% url 'loyalty:wallet' %}">Loyalty Coin</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="{% url 'marketing:about' %}">About Us</a>
+        <a href="{% url 'jobs:job_list' %}">Careers</a>
+        <a href="{% url 'marketing:advertise' %}">Advertise With Us</a>
+        <a href="/admin/">Seller / Admin Login</a>
+      </div>
+      <div class="footer-col">
+        <h4>Policies</h4>
+        <a href="{% url 'marketing:returns' %}">Return Policy</a>
+        <a href="{% url 'marketing:terms' %}">Terms &amp; Conditions</a>
+      </div>
+    </div>
+    <p class="footer-copyright">&copy; {% now "Y" %} Corazon Marketplace. All rights reserved. (Demo project)</p>
   </footer>
+
+  <!-- ============ LIVE ACTIVITY TOAST ============ -->
+  <div class="activity-toast" id="activityToast" hidden></div>
 
   <script>
     // Small bits of server-side state the plain JS in script.js needs —
     // e.g. so the share button knows whether it's safe to call the
     // point-tracking endpoint (login required) without an extra request.
     window.CORAZON = {
-      isAuthenticated: {{ request.user.is_authenticated|yesno:"true,false" }}
+      isAuthenticated: {{ request.user.is_authenticated|yesno:"true,false" }},
+      recentActivityUrl: "{% url 'marketing:recent_activity' %}"
     };
   </script>
   <script src="{% static 'js/script.js' %}"></script>

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Return Policy — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="content-page">
+  <h1>Return Policy</h1>
+  <p class="helptext">Last updated: {% now "F Y" %}</p>
+
+  <h2>1. Return Window</h2>
+  <p>Most items purchased on Corazon Marketplace can be returned within <strong>7 days</strong>
+  of delivery, provided they're unused, undamaged, and in their original packaging.
+  Perishable goods, personal care items that have been opened, and items marked
+  "Final Sale" on the product page are not eligible for return.</p>
+
+  <h2>2. How to Start a Return</h2>
+  <ol>
+    <li>Go to <a href="{% url 'orders:order_history' %}">Your Orders</a> and locate the item.</li>
+    <li>Contact the seller (shown on the order) to request a return.</li>
+    <li>Package the item securely and ship it back using the return details provided.</li>
+  </ol>
+
+  <h2>3. Refunds</h2>
+  <p>Once a returned item is received and inspected by the seller, your refund is issued
+  to your original payment method. If you paid partly with Loyalty Coin, the points
+  portion is credited back to your <a href="{% url 'loyalty:wallet' %}">Loyalty Coin
+  balance</a> rather than refunded as cash.</p>
+
+  <h2>4. Damaged or Incorrect Items</h2>
+  <p>If an item arrives damaged, defective, or different from what you ordered, contact
+  us within 48 hours of delivery with photos of the item — these cases are prioritized
+  and don't count against the standard 7-day window.</p>
+
+  <h2>5. Who Pays for Return Shipping</h2>
+  <p>If the return is due to a seller or fulfillment error (wrong/damaged item), return
+  shipping is free. If you're returning an item simply because you changed your mind,
+  return shipping is the buyer's responsibility unless the seller states otherwise.</p>
+
+  <p class="helptext" style="margin-top:32px;">
+    This page is placeholder policy text generated for demonstration purposes as part of
+    this project template — review and adapt it with a legal professional before using
+    it for a real, live store.
+  </p>
+</div>
+{% endblock %}

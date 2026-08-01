@@ -104,6 +104,9 @@ def home(request):
 
     current_deal = DealOfTheDay.get_current()
 
+    from marketing.models import Advertisement
+    advertisements = Advertisement.objects.filter(is_active=True)
+
     context = {
         'page_obj': page_obj,
         'categories': categories,
@@ -113,6 +116,7 @@ def home(request):
         'current_deal': current_deal,
         'deal_share_url': build_referral_share_url(request, current_deal.product.get_absolute_url()) if current_deal else None,
         'hero_slides': get_hero_slides(),
+        'advertisements': advertisements,
     }
     return render(request, 'products/home.html', context)
 

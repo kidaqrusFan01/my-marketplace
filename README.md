@@ -32,9 +32,19 @@ section where applicants can apply for jobs.
   staff-reviewed request to convert to airtime/data/cash.
 - **Deal of the Day** — an admin-scheduled, time-boxed featured deal shown front-and-center
   on the homepage with a live countdown; buying or sharing it earns bonus loyalty points.
+- **Shop by Category** — a tile grid on the homepage for quick category navigation, the
+  way most large marketplaces (Amazon, Jumia, Konga) surface categories up front.
+- **"Feels alive" touches** — a pulsing live indicator, a scrolling promo ticker (flash
+  sale / delivery / loyalty coin), and toast notifications built from **real recent order
+  activity** (never fabricated) with a graceful fallback message set for a fresh install.
+- **Advertising** — a mid-homepage ad-break section (static banner or auto-scrolling strip,
+  admin-managed), an "Advertise With Us" page with a real inquiry form, and a matching
+  banner on the Careers page inviting employers to post jobs through the same form.
+- **Site content pages** — About, Return Policy, and Terms & Conditions, all linked from
+  a proper multi-column footer.
 - **Superuser admin** — full Django admin access to every model (users, products, orders,
-  jobs, applications, reviews, loyalty accounts/transactions, redemption requests) for the
-  site owner.
+  jobs, applications, reviews, loyalty accounts/transactions, redemption requests,
+  advertisements, business inquiries) for the site owner.
 
 ---
 
@@ -83,13 +93,13 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Database — run migrations this time (important!)
+### 3. Database — run migrations every time you update (important!)
 
-> ⚠️ **This update adds new database tables and columns** (Loyalty Coin, Deal of the
-> Day, referral tracking). Unlike previous versions of this project, the `db.sqlite3`
-> shipped in this zip has **not** been migrated to match them — running the app without
-> migrating first will throw errors like `no such table: loyalty_loyaltyaccount` or
-> `no such column: accounts_customuser.referred_by`.
+> ⚠️ **This project has been updated with new database tables again** — this round adds
+> the `marketing` app (Advertisements, Business/Advertising inquiries) on top of last
+> round's Loyalty Coin and Deal of the Day tables. The `db.sqlite3` shipped in this zip
+> has **not** been migrated to match — running the app without migrating first will
+> throw errors like `no such table: marketing_advertisement`.
 
 Run this before anything else:
 
@@ -98,12 +108,7 @@ python manage.py migrate
 ```
 
 That's it — your existing demo products, seller, and superuser accounts are preserved;
-this only adds the new tables/columns on top of them. If you want the new features
-populated with demo data too (a live Deal of the Day, etc.), also run:
-
-```bash
-python manage.py seed_demo_data
-```
+this only adds the new tables/columns on top of them.
 
 **Default logins (change these before any real/public use):**
 
@@ -176,6 +181,13 @@ Visit:
 | Redeem points at checkout | Add points to your account first (buy something, or share a few products), then at checkout enter a points amount in "Redeem loyalty points" |
 | Redeem for airtime/data/cash | From the wallet page (needs 100+ points), submit a redemption request, then approve/reject it from `/admin/` → Loyalty Coin → Redemption requests |
 | Deal of the Day | Visible automatically on `/` if `seed_demo_data` was run (see below) — or create/edit one at `/admin/` → Products → Deals of the Day |
+| Shop by Category | Automatically shown on `/` right below the hero banner, built from your existing categories — nothing to set up |
+| Promo ticker & live indicator | Visible on every page, right above the header — scrolls automatically, no setup needed |
+| Live activity toast | Appears bottom-left a few seconds after page load, then every ~9 seconds. Shows real recent orders if any exist, otherwise rotates friendly tips |
+| Ad break (homepage) | Empty until you add at least one banner: `/admin/` → Marketing & Site Content → Advertisements → add one (static) or two+ (auto-scrolling) |
+| Advertise With Us | `/advertise/` — submit the form, then check `/admin/` → Marketing & Site Content → Business inquiries |
+| Careers page recruitment banner | Visible at the top of `/jobs/` — "Post a Job With Us" links to the advertise form pre-set to job postings |
+| About / Return Policy / Terms | Linked from the footer on every page (`/about/`, `/returns/`, `/terms/`) |
 
 ---
 

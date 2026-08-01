@@ -67,6 +67,20 @@
     </div>
   </section>
 
+  {% if categories %}
+    <section class="shop-by-category">
+      <h2 class="section-title">Shop by Category</h2>
+      <div class="category-tile-grid">
+        {% for cat in categories %}
+          <a href="{% url 'products:home' %}?category={{ cat.slug }}" class="category-tile">
+            <span class="category-tile-icon">{{ cat.icon|default:"🛍️" }}</span>
+            <span class="category-tile-name">{{ cat.name }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
   {% if current_deal %}
     <section class="deal-of-day" aria-label="Deal of the Day">
       <div class="deal-card">
@@ -135,6 +149,51 @@
         <p>No products yet — check back soon!</p>
       {% endfor %}
     </div>
+  {% endif %}
+
+  {% if advertisements %}
+    <section class="ad-break {% if advertisements|length > 1 %}ad-break--scrolling{% endif %}" aria-label="Advertisement">
+      <span class="ad-break-label">Advertisement</span>
+      {% if advertisements|length > 1 %}
+        <div class="ad-break-track">
+          {% for ad in advertisements %}
+            {% if ad.link_url %}
+              <a href="{{ ad.link_url }}" target="_blank" rel="noopener noreferrer sponsored" class="ad-break-item">
+                <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+              </a>
+            {% else %}
+              <div class="ad-break-item">
+                <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+              </div>
+            {% endif %}
+          {% endfor %}
+          {# Duplicate once more for a seamless scroll loop, same trick as the promo ticker #}
+          {% for ad in advertisements %}
+            {% if ad.link_url %}
+              <a href="{{ ad.link_url }}" target="_blank" rel="noopener noreferrer sponsored" class="ad-break-item">
+                <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+              </a>
+            {% else %}
+              <div class="ad-break-item">
+                <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        {% with ad=advertisements.0 %}
+          {% if ad.link_url %}
+            <a href="{{ ad.link_url }}" target="_blank" rel="noopener noreferrer sponsored" class="ad-break-static">
+              <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+            </a>
+          {% else %}
+            <div class="ad-break-static">
+              <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% endif %}
+    </section>
   {% endif %}
 
   <h2 class="section-title">

@@ -12,6 +12,7 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('jobs/', include('jobs.urls')),
     path('loyalty/', include('loyalty.urls')),
+    path('', include('marketing.urls')),
 ]
 
 admin.site.site_header = "Corazon Marketplace Admin"

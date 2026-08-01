@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Advertise With Us — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="content-page">
+  <h1>📢 Advertise With Us</h1>
+  <p>Reach thousands of active shoppers browsing Corazon Marketplace every day. Whether
+  you want to put your brand in front of buyers or post job openings on our Careers page,
+  we'd love to work with you.</p>
+
+  <div class="advertise-options">
+    <div class="advertise-option-card">
+      <h3>🖼️ Banner Advertising</h3>
+      <p>Your banner featured in our homepage ad section, seen by shoppers as they browse
+      products across every category.</p>
+    </div>
+    <div class="advertise-option-card">
+      <h3>💼 Job Postings</h3>
+      <p>List your open roles on our Careers page and reach job seekers already engaging
+      with our platform.</p>
+    </div>
+  </div>
+
+  <h2>Tell us about your business</h2>
+  <p>Fill out the form below and our team will follow up by email with pricing and next
+  steps — this isn't an instant checkout, a real person reviews every inquiry.</p>
+
+  <div class="form-box">
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary btn-block">Submit Inquiry</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

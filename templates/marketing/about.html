@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}About Us — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="content-page">
+  <h1>About Corazon Marketplace</h1>
+
+  <p>Corazon Marketplace is an online marketplace connecting independent sellers with
+  shoppers across Nigeria — everything from electronics and fashion to home essentials,
+  books, and beauty products, all in one place.</p>
+
+  <h2>What we do</h2>
+  <p>We give independent sellers the tools to list and manage their own products, while
+  giving shoppers a single, familiar place to browse, compare, and buy with confidence.
+  Every order is backed by our <a href="{% url 'marketing:returns' %}">return policy</a>,
+  and every purchase earns you <a href="{% url 'loyalty:wallet' %}">Loyalty Coin</a> —
+  points you can redeem for discounts, delivery credit, or convert to airtime, data, or
+  cash.</p>
+
+  <h2>Our marketplace, your business</h2>
+  <p>Whether you're a shopper looking for a great deal, a seller ready to reach more
+  customers, or a business that wants to <a href="{% url 'marketing:advertise' %}">advertise
+  with us</a> or post job openings on our <a href="{% url 'jobs:job_list' %}">Careers
+  page</a>, Corazon Marketplace is built to grow with you.</p>
+
+  <h2>Get in touch</h2>
+  <p>Have a question, a partnership idea, or feedback for us? Reach out any time —
+  we're a growing team and we'd love to hear from you.</p>
+</div>
+{% endblock %}

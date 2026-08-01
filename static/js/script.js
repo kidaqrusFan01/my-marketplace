@@ -191,5 +191,41 @@ document.addEventListener('DOMContentLoaded', function () {
     tick();
     const timer = setInterval(tick, 1000);
   }
+
+  // ---------------- Live activity toast ("feels alive") ----------------
+  // Cycles through real recent-purchase events (fetched once, from actual
+  // order data — see marketing.views.recent_activity) so this is honest
+  // social proof rather than fabricated numbers. Falls back to friendly
+  // rotating tips server-side if there's no order history yet.
+  const toast = document.getElementById('activityToast');
+  if (toast && window.CORAZON && window.CORAZON.recentActivityUrl) {
+    let events = [];
+    let index = 0;
+
+    function showNext() {
+      if (!events.length) return;
+      toast.textContent = events[index % events.length];
+      toast.hidden = false;
+      toast.classList.add('show');
+      index += 1;
+      setTimeout(function () {
+        toast.classList.remove('show');
+        setTimeout(function () { toast.hidden = true; }, 400);
+      }, 5000);
+    }
+
+    fetch(window.CORAZON.recentActivityUrl)
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        events = data.events || [];
+        if (events.length) {
+          setTimeout(showNext, 3000);
+          setInterval(showNext, 9000);
+        }
+      })
+      .catch(function () {
+        // No live activity feed today — the rest of the site still works fine.
+      });
+  }
 });
 
