@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -78,3 +79,77 @@ class BusinessInquiry(models.Model):
 
     def __str__(self):
         return f"{self.company_name} — {self.get_inquiry_type_display()}"
+
+
+class VendorSubscription(models.Model):
+    """
+    A seller's CURRENT active listing plan (see /pricing/). This is what
+    would drive actual listing placement (first-page featuring, Deal of
+    the Day eligibility, etc.) if that logic gets built out — for now it's
+    the record of what plan a seller is on, set by admin once a bank
+    transfer is confirmed over WhatsApp.
+
+    Every seller effectively starts on 'free' — this row is created lazily
+    the first time it's needed rather than for every signup.
+    """
+    seller = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='vendor_subscription'
+    )
+    current_plan = models.CharField(max_length=20, default='free')
+    activated_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_or_create_for(cls, seller):
+        account, _ = cls.objects.get_or_create(seller=seller)
+        return account
+
+    @property
+    def plan_display(self):
+        from .constants import get_plan
+        plan = get_plan(self.current_plan)
+        return plan['name'] if plan else self.current_plan.title()
+
+    def __str__(self):
+        return f"{self.seller.username} — {self.plan_display}"
+
+
+class VendorPlanRequest(models.Model):
+    """
+    A seller's request to move to a paid plan. Payment is by bank
+    transfer, confirmed by the seller over WhatsApp — there's no live
+    payment gateway wired up here (same reasoning as the loyalty cash
+    payouts and ad-sales inquiries: that needs a real billing/telco
+    integration, not something to fake). Staff confirm the transfer, then
+    mark this request "confirmed" — doing so also activates the plan on
+    the seller's VendorSubscription (see admin.py).
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending payment confirmation'),
+        ('confirmed', 'Confirmed — plan activated'),
+        ('rejected', 'Rejected'),
+    ]
+
+    seller = models.ForeignKey(
+        'accounts.CustomUser', on_delete=models.CASCADE, related_name='plan_requests'
+    )
+    requested_plan = models.CharField(max_length=20)
+    note = models.CharField(
+        max_length=200, blank=True,
+        help_text="Optional note from the seller, e.g. when they'll send the transfer."
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    @property
+    def plan_display(self):
+        from .constants import get_plan
+        plan = get_plan(self.requested_plan)
+        return plan['name'] if plan else self.requested_plan.title()
+
+    def __str__(self):
+        return f"{self.seller.username} → {self.plan_display} ({self.status})"

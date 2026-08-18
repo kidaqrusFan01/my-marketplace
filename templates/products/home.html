@@ -120,18 +120,20 @@
                   Add to Cart
                 </button>
               </form>
-              <button type="button" class="btn btn-outline share-toggle" id="shareToggleBtn"
-                      data-share-url="{{ deal_share_url }}"
-                      data-share-title="{{ current_deal.product.name }}"
-                      data-product-id="{{ current_deal.product.id }}"
-                      aria-haspopup="true" aria-expanded="false">
-                &#128257; Share
-              </button>
-              <div class="share-menu" id="shareMenu">
-                <a href="https://twitter.com/intent/tweet?url={{ deal_share_url|urlencode }}&text={{ current_deal.product.name|urlencode }}" target="_blank" rel="noopener noreferrer">Share on X / Twitter</a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ deal_share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
-                <a href="https://api.whatsapp.com/send?text={{ current_deal.product.name|urlencode }}%20{{ deal_share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
-                <button type="button" class="share-copy-btn" data-copy-url="{{ deal_share_url }}">Copy Link</button>
+              <div class="share-widget">
+                <button type="button" class="btn btn-outline share-toggle"
+                        data-share-url="{{ deal_share_url }}"
+                        data-share-title="{{ current_deal.product.name }}"
+                        data-product-id="{{ current_deal.product.id }}"
+                        aria-haspopup="true" aria-expanded="false">
+                  &#128257; Share
+                </button>
+                <div class="share-menu">
+                  <a href="https://twitter.com/intent/tweet?url={{ deal_share_url|urlencode }}&text={{ current_deal.product.name|urlencode }}" target="_blank" rel="noopener noreferrer">Share on X / Twitter</a>
+                  <a href="https://www.facebook.com/sharer/sharer.php?u={{ deal_share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+                  <a href="https://api.whatsapp.com/send?text={{ current_deal.product.name|urlencode }}%20{{ deal_share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                  <button type="button" class="share-copy-btn" data-copy-url="{{ deal_share_url }}">Copy Link</button>
+                </div>
               </div>
             </div>
           </div>

@@ -54,12 +54,12 @@
 
     <!-- Share button -->
     <div class="share-widget">
-      <button type="button" class="btn btn-outline btn-sm share-toggle" id="shareToggleBtn"
+      <button type="button" class="btn btn-outline btn-sm share-toggle"
               data-share-url="{{ share_url }}" data-share-title="{{ product.name }}" data-product-id="{{ product.id }}"
               aria-haspopup="true" aria-expanded="false">
         &#128257; Share
       </button>
-      <div class="share-menu" id="shareMenu">
+      <div class="share-menu">
         <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ product.name|urlencode }}" target="_blank" rel="noopener noreferrer">Share on X / Twitter</a>
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
         <a href="https://api.whatsapp.com/send?text={{ product.name|urlencode }}%20{{ share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>

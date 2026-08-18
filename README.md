@@ -42,9 +42,15 @@ section where applicants can apply for jobs.
   banner on the Careers page inviting employers to post jobs through the same form.
 - **Site content pages** — About, Return Policy, and Terms & Conditions, all linked from
   a proper multi-column footer.
+- **Seller pricing plans** — a public `/pricing/` page (Free/Growth/Business/Premium) that
+  lets sellers request better listing placement, paid by bank transfer and confirmed by
+  staff over WhatsApp (no live payment gateway — see the dedicated section below).
+- **Vendor product sharing** — every product row in the Seller Dashboard has its own
+  Share button (X/Twitter, Facebook, WhatsApp, copy link), tagged with the seller's
+  referral code so promoting their own listings also earns them Loyalty Coin.
 - **Superuser admin** — full Django admin access to every model (users, products, orders,
   jobs, applications, reviews, loyalty accounts/transactions, redemption requests,
-  advertisements, business inquiries) for the site owner.
+  advertisements, business inquiries, vendor plans) for the site owner.
 
 ---
 
@@ -188,6 +194,44 @@ Visit:
 | Advertise With Us | `/advertise/` — submit the form, then check `/admin/` → Marketing & Site Content → Business inquiries |
 | Careers page recruitment banner | Visible at the top of `/jobs/` — "Post a Job With Us" links to the advertise form pre-set to job postings |
 | About / Return Policy / Terms | Linked from the footer on every page (`/about/`, `/returns/`, `/terms/`) |
+| Vendor pricing plans | `/pricing/` (also linked from the footer) — log in as a seller to actually request a plan; the Free plan applies instantly, paid plans create a pending request |
+| Confirm & activate a paid plan | `/admin/` → Marketing & Site Content → Vendor plan requests → select a pending request → action dropdown → "Confirm payment & activate the requested plan" |
+| Vendor product sharing | Log in as a seller, go to `/seller/dashboard/` — every product row has its own Share button in the rightmost column |
+
+---
+
+## Vendor Pricing Plans — how it works
+
+| Plan | Price/month | What it gets you |
+|---|---|---|
+| Free | ₦0 | Product listing only |
+| Growth | ₦5,000 | + Priority placement within category, boosted search visibility |
+| Business | ₦10,000 | + Featured on the homepage first page, priority support |
+| Premium | ₦15,000 | + Eligible for Deal of the Day placement — the best listing on the site |
+
+All of this lives in one file, `marketing/constants.py`, so prices/features/plan copy
+can be changed without touching any view or template logic.
+
+> ⚠️ **Two placeholders need real values before this goes live**, both in
+> `marketing/constants.py`:
+> - `BANK_TRANSFER_DETAILS` — currently `"REPLACE WITH ACCOUNT NAME"` etc.
+> - `WHATSAPP_NUMBER` — currently `"234XXXXXXXXXX"`. Use digits only with country code
+>   (e.g. `2348012345678`), since it builds a `wa.me/...` click-to-chat link on the
+>   pricing page.
+>
+> Until you swap these in, the pricing page will show these placeholder values
+> literally — it won't error, but it also won't be usable for real payments.
+
+**Why no live payment gateway?** Per the brief, all plans are paid by bank transfer and
+confirmed by staff over WhatsApp — there's no card checkout to fake here, since that
+needs a real payment processor and merchant account. The flow is: a seller requests a
+plan on `/pricing/` → they see the bank details and a WhatsApp button → once payment is
+confirmed, a staff member selects the request in `/admin/` → Marketing & Site Content →
+Vendor plan requests → runs the **"Confirm payment & activate the requested plan"**
+action, which activates the plan immediately. Note: choosing a plan doesn't yet change
+*where* a product actually shows up (e.g. automatically pinning Premium products to Deal
+of the Day) — the plan is tracked and displayed everywhere, but wiring that into the
+actual homepage placement logic is a reasonable next step once you're ready for it.
 
 ---
 

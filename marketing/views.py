@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
-from .forms import BusinessInquiryForm
+from .forms import BusinessInquiryForm, VendorPlanRequestForm
 
 # Shown when there isn't enough real order activity yet to fill the toast
 # feed (e.g. a freshly-seeded install) — keeps the "site feels alive"
@@ -88,3 +88,61 @@ def advertise_with_us(request):
         form = BusinessInquiryForm(initial={'inquiry_type': initial_type})
 
     return render(request, 'marketing/advertise.html', {'form': form})
+
+
+def pricing(request):
+    """
+    Public pricing page — anyone can view it, but only logged-in sellers
+    can actually request a plan (they need a seller account to have
+    products to list in the first place). Non-sellers see a "Become a
+    Seller" prompt on each paid tier's button instead of a request form.
+    """
+    from .constants import VENDOR_PLANS, BANK_TRANSFER_DETAILS, WHATSAPP_NUMBER
+    from .models import VendorSubscription, VendorPlanRequest
+
+    current_plan = 'free'
+    pending_request = None
+    if request.user.is_authenticated and request.user.is_seller:
+        subscription = VendorSubscription.objects.filter(seller=request.user).first()
+        current_plan = subscription.current_plan if subscription else 'free'
+        pending_request = VendorPlanRequest.objects.filter(
+            seller=request.user, status='pending'
+        ).first()
+
+    if request.method == 'POST' and request.user.is_authenticated and request.user.is_seller:
+        requested_plan = request.POST.get('plan')
+        valid_keys = [p['key'] for p in VENDOR_PLANS]
+        if requested_plan not in valid_keys:
+            messages.error(request, "That's not a valid plan.")
+            return redirect('marketing:pricing')
+
+        if requested_plan == 'free':
+            # No payment needed — just set it directly.
+            subscription = VendorSubscription.get_or_create_for(request.user)
+            subscription.current_plan = 'free'
+            subscription.save(update_fields=['current_plan'])
+            messages.success(request, "You're on the Free plan.")
+            return redirect('marketing:pricing')
+
+        form = VendorPlanRequestForm(request.POST)
+        if form.is_valid():
+            plan_request = form.save(commit=False)
+            plan_request.seller = request.user
+            plan_request.requested_plan = requested_plan
+            plan_request.save()
+            messages.success(
+                request,
+                f"Request received for the {requested_plan.title()} plan! Complete the bank "
+                "transfer below, then send proof of payment on WhatsApp — we'll activate your "
+                "plan as soon as it's confirmed."
+            )
+            return redirect('marketing:pricing')
+
+    return render(request, 'marketing/pricing.html', {
+        'plans': VENDOR_PLANS,
+        'current_plan': current_plan,
+        'pending_request': pending_request,
+        'bank_details': BANK_TRANSFER_DETAILS,
+        'whatsapp_number': WHATSAPP_NUMBER,
+        'note_form': VendorPlanRequestForm(),
+    })

@@ -102,9 +102,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const shareBtn = document.getElementById('shareToggleBtn');
-  const shareMenu = document.getElementById('shareMenu');
-  if (shareBtn && shareMenu) {
+  // Supports any number of share widgets on one page (a single product
+  // page has one; the seller dashboard has one per product row). Each
+  // button finds its own menu via the shared `.share-widget` wrapper
+  // rather than relying on a page-unique ID.
+  document.querySelectorAll('.share-toggle').forEach(function (shareBtn) {
+    const widget = shareBtn.closest('.share-widget');
+    const shareMenu = widget ? widget.querySelector('.share-menu') : null;
+    if (!shareMenu) return;
     const productId = shareBtn.dataset.productId;
 
     shareBtn.addEventListener('click', function (e) {
@@ -123,17 +128,17 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      // Desktop fallback: toggle our own dropdown of platform links.
+      // Desktop fallback: toggle this button's own dropdown of platform
+      // links, closing any other open share menu on the page first.
       const isOpen = shareMenu.classList.contains('open');
+      document.querySelectorAll('.share-menu.open').forEach(function (openMenu) {
+        openMenu.classList.remove('open');
+      });
+      document.querySelectorAll('.share-toggle[aria-expanded="true"]').forEach(function (openBtn) {
+        openBtn.setAttribute('aria-expanded', 'false');
+      });
       shareMenu.classList.toggle('open', !isOpen);
       shareBtn.setAttribute('aria-expanded', String(!isOpen));
-    });
-
-    document.addEventListener('click', function (e) {
-      if (shareMenu.classList.contains('open') && !shareMenu.contains(e.target) && e.target !== shareBtn) {
-        shareMenu.classList.remove('open');
-        shareBtn.setAttribute('aria-expanded', 'false');
-      }
     });
 
     // Any real platform link (X, Facebook, WhatsApp, LinkedIn, Email) counts
@@ -160,7 +165,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       });
     }
-  }
+  });
+
+  // Clicking anywhere outside a share widget closes any open menu.
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.share-widget')) return;
+    document.querySelectorAll('.share-menu.open').forEach(function (openMenu) {
+      openMenu.classList.remove('open');
+    });
+    document.querySelectorAll('.share-toggle[aria-expanded="true"]').forEach(function (openBtn) {
+      openBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
 
   // ---------------- Deal of the Day countdown ----------------
   const countdownEl = document.getElementById('dealCountdown');

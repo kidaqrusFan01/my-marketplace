@@ -9,6 +9,16 @@
   </div>
   <p>Store: <strong>{{ request.user.store_name|default:request.user.username }}</strong></p>
 
+  <div class="vendor-plan-banner">
+    <div>
+      <strong>Your listing plan: {{ current_plan|title }}</strong>
+      <span>{% if current_plan == 'free' %}Upgrade for better product placement — up to Deal of the Day.{% else %}Thanks for being a paid vendor! Manage or change your plan any time.{% endif %}</span>
+    </div>
+    <a href="{% url 'marketing:pricing' %}" class="btn btn-primary btn-sm">
+      {% if current_plan == 'free' %}Upgrade Your Listing{% else %}Manage Plan{% endif %}
+    </a>
+  </div>
+
   <div class="card" style="overflow-x:auto;">
     <table class="dash-table">
       <thead>
@@ -19,10 +29,12 @@
           <th>Stock</th>
           <th>Status</th>
           <th>Actions</th>
+          <th>Promote</th>
         </tr>
       </thead>
       <tbody>
-        {% for product in products %}
+        {% for row in products_with_share %}
+          {% with product=row.product %}
           <tr>
             <td>
               {% if product.image %}<img src="{{ product.image.url }}" alt="">{% else %}<img src="https://placehold.co/50x50" alt="">{% endif %}
@@ -41,9 +53,27 @@
               <a href="{% url 'products:product_update' product.pk %}" class="btn btn-sm btn-outline">Edit</a>
               <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-sm btn-danger">Delete</a>
             </td>
+            <td>
+              <div class="share-widget">
+                <button type="button" class="btn btn-sm btn-outline share-toggle"
+                        data-share-url="{{ row.share_url }}"
+                        data-share-title="{{ product.name }}"
+                        data-product-id="{{ product.id }}"
+                        aria-haspopup="true" aria-expanded="false">
+                  &#128257; Share
+                </button>
+                <div class="share-menu">
+                  <a href="https://twitter.com/intent/tweet?url={{ row.share_url|urlencode }}&text={{ product.name|urlencode }}" target="_blank" rel="noopener noreferrer">Share on X / Twitter</a>
+                  <a href="https://www.facebook.com/sharer/sharer.php?u={{ row.share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+                  <a href="https://api.whatsapp.com/send?text={{ product.name|urlencode }}%20{{ row.share_url|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+                  <button type="button" class="share-copy-btn" data-copy-url="{{ row.share_url }}">Copy Link</button>
+                </div>
+              </div>
+            </td>
           </tr>
+          {% endwith %}
         {% empty %}
-          <tr><td colspan="6">You haven't listed any products yet. <a href="{% url 'products:product_create' %}">Add your first product</a>.</td></tr>
+          <tr><td colspan="7">You haven't listed any products yet. <a href="{% url 'products:product_create' %}">Add your first product</a>.</td></tr>
         {% endfor %}
       </tbody>
     </table>

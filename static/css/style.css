@@ -1067,6 +1067,85 @@ footer a:hover { color: var(--white); text-decoration: underline; }
 .recruit-banner strong { display: block; font-family: var(--font-heading); }
 .recruit-banner span { font-size: 13px; color: rgba(255,255,255,0.8); }
 
+/* ---------------- Vendor plan banner (seller dashboard) ---------------- */
+.vendor-plan-banner {
+  background: linear-gradient(120deg, var(--navy-dark), var(--navy-mid));
+  color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 16px 0;
+}
+.vendor-plan-banner strong { display: block; font-family: var(--font-heading); }
+.vendor-plan-banner span { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+/* ---------------- Pricing page ---------------- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+.pricing-card {
+  position: relative;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.pricing-card--recommended { border-color: var(--orange); box-shadow: var(--shadow-lg); transform: translateY(-6px); }
+.pricing-card--current { border-color: var(--success); }
+.pricing-card h3 { margin: 6px 0 0; font-size: 20px; }
+.pricing-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--orange);
+  color: var(--navy-dark);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.pricing-badge--current { background: var(--success); color: var(--white); }
+.pricing-amount { font-family: var(--font-heading); font-size: 30px; font-weight: 700; margin: 14px 0; }
+.pricing-period { font-size: 13px; font-weight: 400; color: var(--text-muted); }
+.pricing-features { list-style: none; padding: 0; margin: 0 0 20px; flex: 1; }
+.pricing-features li { font-size: 13px; margin-bottom: 10px; line-height: 1.4; }
+.pricing-card input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.bank-details-box {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+.bank-details-box strong { display: block; margin-bottom: 6px; }
+.bank-details-box p { margin: 2px 0; font-size: 14px; }
+
+@media (max-width: 900px) {
+  .pricing-grid { grid-template-columns: 1fr 1fr; }
+  .pricing-card--recommended { transform: none; }
+}
+@media (max-width: 600px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
   .detail-layout { grid-template-columns: 1fr; }

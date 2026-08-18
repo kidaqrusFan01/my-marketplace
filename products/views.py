@@ -163,7 +163,22 @@ def product_detail(request, slug):
 @user_passes_test(is_seller, login_url='accounts:login')
 def seller_dashboard(request):
     products = Product.objects.filter(seller=request.user).order_by('-created_at')
-    return render(request, 'products/seller_dashboard.html', {'products': products})
+
+    # Precompute each product's referral-tagged share link here rather than
+    # in the template, since it needs the request object.
+    products_with_share = [
+        {'product': p, 'share_url': build_referral_share_url(request, p.get_absolute_url())}
+        for p in products
+    ]
+
+    from marketing.models import VendorSubscription
+    subscription = VendorSubscription.objects.filter(seller=request.user).first()
+    current_plan = subscription.current_plan if subscription else 'free'
+
+    return render(request, 'products/seller_dashboard.html', {
+        'products_with_share': products_with_share,
+        'current_plan': current_plan,
+    })
 
 
 @login_required
