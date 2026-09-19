@@ -1,8 +1,11 @@
+from functools import wraps
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 from .models import Product, Category, Review, HeroBanner, DealOfTheDay
 from .forms import ProductForm, ReviewForm
@@ -10,6 +13,28 @@ from .forms import ProductForm, ReviewForm
 
 def is_seller(user):
     return user.is_authenticated and user.is_seller
+
+
+def seller_required(view_func):
+    """
+    Guards seller-only views. This is deliberately NOT
+    @login_required + @user_passes_test(is_seller, login_url='accounts:login'):
+    that combination sends an authenticated-but-not-a-seller user to the
+    login page, and CorazonLoginView's redirect_authenticated_user=True
+    immediately bounces an already-logged-in user straight back to
+    `next` — which fails the seller test again, straight back to login,
+    forever. An anonymous visitor still goes to login as normal; a logged
+    -in customer instead gets a clear message and a way to become a seller.
+    """
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('accounts:login')}?next={request.path}")
+        if not request.user.is_seller:
+            messages.info(request, "You need a seller account to access that page.")
+            return redirect('accounts:signup_seller')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 def build_referral_share_url(request, path):
@@ -159,8 +184,7 @@ def product_detail(request, slug):
     return render(request, 'products/product_detail.html', context)
 
 
-@login_required
-@user_passes_test(is_seller, login_url='accounts:login')
+@seller_required
 def seller_dashboard(request):
     products = Product.objects.filter(seller=request.user).order_by('-created_at')
 
@@ -181,8 +205,75 @@ def seller_dashboard(request):
     })
 
 
-@login_required
-@user_passes_test(is_seller, login_url='accounts:login')
+@seller_required
+def vendor_page(request):
+    """
+    A vendor's own profile/analytics page: who they are, what they sell,
+    and how their product-sharing is performing — both their own sharing
+    activity (which earns them Loyalty Coin, see loyalty.views.track_share)
+    and, separately, how often anyone (including customers) has shared
+    their products, as a rough reach/popularity signal.
+    """
+    vendor = request.user
+    products = Product.objects.filter(seller=vendor)
+
+    from django.db.models import Sum, Count
+    from marketing.models import VendorSubscription
+    from loyalty.models import LoyaltyAccount, LoyaltyTransaction
+
+    account = LoyaltyAccount.get_or_create_for(vendor)
+
+    # Shares the vendor personally performed (from their dashboard's Share
+    # buttons) — this is what actually earns THEM Loyalty Coin.
+    own_shares = LoyaltyTransaction.objects.filter(
+        account=account, reason='share'
+    ).select_related('related_product')
+
+    total_shares_by_vendor = own_shares.count()
+    total_bonus_from_shares = own_shares.aggregate(total=Sum('points'))['total'] or 0
+
+    # Per-product breakdown of the vendor's own shares.
+    shared_products = {}
+    for txn in own_shares:
+        if not txn.related_product:
+            continue
+        entry = shared_products.setdefault(txn.related_product.id, {
+            'product': txn.related_product, 'share_count': 0, 'points_earned': 0,
+        })
+        entry['share_count'] += 1
+        entry['points_earned'] += txn.points
+    shared_products = sorted(shared_products.values(), key=lambda e: -e['share_count'])
+
+    # Broader signal: how many times ANYONE has shared each of this
+    # vendor's products (customers sharing a product earn points
+    # themselves, not the vendor — this is just reach, not the vendor's
+    # own bonus).
+    product_reach = (
+        LoyaltyTransaction.objects.filter(reason='share', related_product__seller=vendor)
+        .values('related_product', 'related_product__name', 'related_product__slug')
+        .annotate(total_shares=Count('id'))
+        .order_by('-total_shares')
+    )
+    total_reach_shares = sum(row['total_shares'] for row in product_reach)
+
+    subscription = VendorSubscription.objects.filter(seller=vendor).first()
+    current_plan = subscription.current_plan if subscription else 'free'
+
+    return render(request, 'products/vendor_page.html', {
+        'vendor': vendor,
+        'products_count': products.count(),
+        'active_products_count': products.filter(is_active=True).count(),
+        'current_plan': current_plan,
+        'loyalty_balance': account.balance,
+        'total_shares_by_vendor': total_shares_by_vendor,
+        'total_bonus_from_shares': total_bonus_from_shares,
+        'shared_products': shared_products,
+        'product_reach': product_reach,
+        'total_reach_shares': total_reach_shares,
+    })
+
+
+@seller_required
 def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
@@ -197,8 +288,7 @@ def product_create(request):
     return render(request, 'products/product_form.html', {'form': form, 'action': 'Add'})
 
 
-@login_required
-@user_passes_test(is_seller, login_url='accounts:login')
+@seller_required
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk, seller=request.user)
     if request.method == 'POST':
@@ -212,8 +302,7 @@ def product_update(request, pk):
     return render(request, 'products/product_form.html', {'form': form, 'action': 'Edit'})
 
 
-@login_required
-@user_passes_test(is_seller, login_url='accounts:login')
+@seller_required
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk, seller=request.user)
     if request.method == 'POST':

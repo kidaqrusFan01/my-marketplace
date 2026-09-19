@@ -80,3 +80,85 @@ VENDOR_PLAN_KEYS = [plan['key'] for plan in VENDOR_PLANS]
 
 def get_plan(key):
     return next((p for p in VENDOR_PLANS if p['key'] == key), None)
+
+
+# ----------------------------------------------------------------------
+# Advertising plans — shown on /advertise/ (banner ads + job postings for
+# businesses, as opposed to VENDOR_PLANS above which is about a seller's
+# own product-listing placement). Structure/price points follow the
+# reference pricing design supplied for this page: 4 tiers, monthly or
+# yearly billing (20% off yearly), with higher tiers unlocking more
+# banner ad inventory and job-posting volume.
+# ----------------------------------------------------------------------
+ADVERTISING_YEARLY_DISCOUNT_PERCENT = 20
+
+ADVERTISING_PLANS = [
+    {
+        'key': 'starter',
+        'name': 'Starter',
+        'subtitle': 'For testing the waters',
+        'price': 0,
+        'badge': None,
+        'cta_text': 'Start Free',
+        'features': [
+            'Submit unlimited inquiries to our team',
+            '1 job posting per month on the Careers page',
+            'Listed in our advertiser directory',
+        ],
+    },
+    {
+        'key': 'growth',
+        'name': 'Growth',
+        'subtitle': 'Most businesses start here',
+        'price': 10000,
+        'badge': 'Most Popular',
+        'cta_text': 'Choose Growth',
+        'features': [
+            'Everything in Starter',
+            '1 homepage banner slot (7 days/month)',
+            '5 job postings per month',
+            'Standard placement in the ad rotation',
+        ],
+    },
+    {
+        'key': 'business',
+        'name': 'Business',
+        'subtitle': 'For serious brands',
+        'price': 25000,
+        'badge': None,
+        'cta_text': 'Go Business',
+        'features': [
+            'Everything in Growth',
+            '2 homepage banner slots, ongoing',
+            '20 job postings per month',
+            'Priority placement in the ad rotation',
+        ],
+    },
+    {
+        'key': 'enterprise',
+        'name': 'Enterprise',
+        'subtitle': 'Best for big brands',
+        'price': 50000,
+        'badge': 'Best for Big Brands',
+        'cta_text': 'Contact Sales',
+        'features': [
+            'Everything in Business',
+            'Dedicated homepage banner slot',
+            'Unlimited job postings',
+            'Dedicated account manager',
+        ],
+    },
+]
+
+ADVERTISING_PLAN_KEYS = [plan['key'] for plan in ADVERTISING_PLANS]
+
+# Precompute each plan's discounted yearly total once, here, rather than
+# doing price math inside the template (which Django's template language
+# is deliberately bad at — {% widthratio %} works but is fragile/unclear).
+for _plan in ADVERTISING_PLANS:
+    _plan['price_yearly'] = round(_plan['price'] * 12 * (1 - ADVERTISING_YEARLY_DISCOUNT_PERCENT / 100))
+del _plan
+
+
+def get_advertising_plan(key):
+    return next((p for p in ADVERTISING_PLANS if p['key'] == key), None)

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load currency_filters %}
+{% block title %}Vendor Page — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+  <h1>🏪 Vendor Page</h1>
+  <a href="{% url 'products:seller_dashboard' %}" class="btn btn-outline btn-sm">&larr; Back to Dashboard</a>
+</div>
+
+<!-- ============ VENDOR DETAILS ============ -->
+<div class="vendor-profile-card">
+  <div class="vendor-profile-avatar">{{ vendor.store_name|default:vendor.username|first|upper }}</div>
+  <div class="vendor-profile-info">
+    <h2>{{ vendor.store_name|default:vendor.username }}</h2>
+    <p class="helptext">@{{ vendor.username }} &middot; Vendor since {{ vendor.created_at|date:"M Y" }}</p>
+    <div class="vendor-profile-meta">
+      {% if vendor.email %}<span>✉️ {{ vendor.email }}</span>{% endif %}
+      {% if vendor.phone_number %}<span>📞 {{ vendor.phone_number }}</span>{% endif %}
+      {% if vendor.address %}<span>📍 {{ vendor.address }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="vendor-profile-plan">
+    <span class="badge active">{{ current_plan|title }} Plan</span>
+    <a href="{% url 'marketing:pricing' %}" class="helptext" style="display:block; margin-top:6px;">Manage plan &rarr;</a>
+  </div>
+</div>
+
+<!-- ============ STATS ============ -->
+<div class="vendor-stats-grid">
+  <div class="vendor-stat-box">
+    <span class="vendor-stat-value">{{ products_count }}</span>
+    <span class="vendor-stat-label">Products Listed</span>
+  </div>
+  <div class="vendor-stat-box">
+    <span class="vendor-stat-value">{{ active_products_count }}</span>
+    <span class="vendor-stat-label">Active Listings</span>
+  </div>
+  <div class="vendor-stat-box vendor-stat-box--highlight">
+    <span class="vendor-stat-value">{{ total_shares_by_vendor }}</span>
+    <span class="vendor-stat-label">Times You've Shared</span>
+  </div>
+  <div class="vendor-stat-box vendor-stat-box--highlight">
+    <span class="vendor-stat-value">{{ total_bonus_from_shares }} pts</span>
+    <span class="vendor-stat-label">Bonus Earned From Sharing</span>
+  </div>
+  <div class="vendor-stat-box">
+    <span class="vendor-stat-value">{{ loyalty_balance }} pts</span>
+    <span class="vendor-stat-label">Current Loyalty Balance</span>
+  </div>
+</div>
+
+<!-- ============ PRODUCTS YOU'VE SHARED ============ -->
+<h2 class="section-title">Products You've Shared</h2>
+<p class="helptext">Every time you share one of your own products from the Seller Dashboard, you earn Loyalty Coin — this is your personal sharing performance.</p>
+
+<div class="card" style="overflow-x:auto;">
+  <table class="dash-table">
+    <thead>
+      <tr><th>Product</th><th>Times Shared by You</th><th>Points Earned</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for entry in shared_products %}
+        <tr>
+          <td style="display:flex; align-items:center; gap:8px;">
+            {% if entry.product.image %}<img src="{{ entry.product.image.url }}" alt="">{% else %}<img src="https://placehold.co/50x50" alt="">{% endif %}
+            {{ entry.product.name }}
+          </td>
+          <td>{{ entry.share_count }}</td>
+          <td style="color:var(--success); font-weight:600;">+{{ entry.points_earned }}</td>
+          <td><a href="{{ entry.product.get_absolute_url }}" class="btn btn-sm btn-outline">View</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">You haven't shared any products yet. Head to your <a href="{% url 'products:seller_dashboard' %}">Seller Dashboard</a> and hit "Share" on a product to start earning bonus points.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ============ PRODUCT REACH (shared by anyone) ============ -->
+<h2 class="section-title">Product Reach</h2>
+<p class="helptext">How often each of your products has been shared by anyone — including customers. This reflects how far your listings are spreading, separate from your own bonus above (a customer sharing your product earns them points, not you).</p>
+
+<div class="card" style="overflow-x:auto;">
+  <table class="dash-table">
+    <thead>
+      <tr><th>Product</th><th>Total Times Shared</th></tr>
+    </thead>
+    <tbody>
+      {% for row in product_reach %}
+        <tr>
+          <td>{{ row.related_product__name }}</td>
+          <td>{{ row.total_shares }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">No sharing activity on your products yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if product_reach %}
+    <p class="helptext" style="margin-top:10px;">Total: <strong>{{ total_reach_shares }}</strong> shares across all your products.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -38,8 +38,10 @@ section where applicants can apply for jobs.
   sale / delivery / loyalty coin), and toast notifications built from **real recent order
   activity** (never fabricated) with a graceful fallback message set for a fresh install.
 - **Advertising** — a mid-homepage ad-break section (static banner or auto-scrolling strip,
-  admin-managed), an "Advertise With Us" page with a real inquiry form, and a matching
-  banner on the Careers page inviting employers to post jobs through the same form.
+  admin-managed), an "Advertise With Us" page with four pricing tiers (Starter/Growth/
+  Business/Enterprise) and a real inquiry form that **emails the site admin** the moment
+  someone submits it, and a matching banner on the Careers page inviting employers to
+  post jobs through the same form.
 - **Site content pages** — About, Return Policy, and Terms & Conditions, all linked from
   a proper multi-column footer.
 - **Seller pricing plans** — a public `/pricing/` page (Free/Growth/Business/Premium) that
@@ -48,6 +50,10 @@ section where applicants can apply for jobs.
 - **Vendor product sharing** — every product row in the Seller Dashboard has its own
   Share button (X/Twitter, Facebook, WhatsApp, copy link), tagged with the seller's
   referral code so promoting their own listings also earns them Loyalty Coin.
+- **Vendor Page** — a seller's own profile & sharing-performance page: their store
+  details, product counts, current plan, total bonus points earned from sharing their
+  own products, and a "Product Reach" breakdown of how often each product has been
+  shared by anyone (not just them).
 - **Superuser admin** — full Django admin access to every model (users, products, orders,
   jobs, applications, reviews, loyalty accounts/transactions, redemption requests,
   advertisements, business inquiries, vendor plans) for the site owner.
@@ -191,12 +197,54 @@ Visit:
 | Promo ticker & live indicator | Visible on every page, right above the header — scrolls automatically, no setup needed |
 | Live activity toast | Appears bottom-left a few seconds after page load, then every ~9 seconds. Shows real recent orders if any exist, otherwise rotates friendly tips |
 | Ad break (homepage) | Empty until you add at least one banner: `/admin/` → Marketing & Site Content → Advertisements → add one (static) or two+ (auto-scrolling) |
-| Advertise With Us | `/advertise/` — submit the form, then check `/admin/` → Marketing & Site Content → Business inquiries |
+| Advertise With Us | `/advertise/` — pick a plan (scrolls to the form, pre-attached) or just fill it out directly, then submit — check your terminal for the notification email (console backend by default), and `/admin/` → Marketing & Site Content → Business inquiries |
 | Careers page recruitment banner | Visible at the top of `/jobs/` — "Post a Job With Us" links to the advertise form pre-set to job postings |
 | About / Return Policy / Terms | Linked from the footer on every page (`/about/`, `/returns/`, `/terms/`) |
 | Vendor pricing plans | `/pricing/` (also linked from the footer) — log in as a seller to actually request a plan; the Free plan applies instantly, paid plans create a pending request |
 | Confirm & activate a paid plan | `/admin/` → Marketing & Site Content → Vendor plan requests → select a pending request → action dropdown → "Confirm payment & activate the requested plan" |
 | Vendor product sharing | Log in as a seller, go to `/seller/dashboard/` — every product row has its own Share button in the rightmost column |
+| Vendor Page | Log in as a seller, go to `/seller/vendor-page/` (also linked from the Seller Dashboard header and mobile sidebar) — share a couple of your own products first so the stats aren't empty |
+
+---
+
+## Advertising Plans & Inquiry Notifications — how they work
+
+`/advertise/` (linked from the footer and the Careers page banner) has its own four
+pricing tiers — separate from the seller listing plans above, since this page is about
+businesses buying homepage banner space and/or job-posting slots, not sellers' own
+product placement:
+
+| Plan | Price/month | What it unlocks |
+|---|---|---|
+| Starter | Free | Unlimited inquiries, 1 job posting/month, directory listing |
+| Growth | ₦10,000 | + 1 homepage banner slot (7 days/month), 5 job postings/month |
+| Business | ₦25,000 | + 2 ongoing banner slots, 20 job postings/month, priority ad rotation |
+| Enterprise | ₦50,000 | + Dedicated banner slot, unlimited job postings, dedicated account manager |
+
+These also live in `marketing/constants.py` (`ADVERTISING_PLANS`), with a monthly/yearly
+toggle on the page itself (20% off yearly, computed automatically — no manual yearly
+prices to keep in sync). Clicking a plan's button scrolls to the inquiry form with that
+plan pre-attached, so whoever reviews the inquiry knows which tier they're interested in.
+
+**Inquiry notifications**: submitting the form now emails whoever's set as
+`ADMIN_NOTIFICATION_EMAIL` immediately, with the full inquiry details and a direct link
+to review it in `/admin/`. By default this uses Django's **console email backend** —
+"sending" an email just prints it to the terminal running `runserver`, which is enough
+to prove the flow works end-to-end, but isn't real delivery. To actually receive these
+by email, set real SMTP credentials as environment variables before starting the server:
+
+```bash
+export DJANGO_EMAIL_HOST=smtp.gmail.com
+export DJANGO_EMAIL_PORT=587
+export DJANGO_EMAIL_USE_TLS=True
+export DJANGO_EMAIL_HOST_USER=you@gmail.com
+export DJANGO_EMAIL_HOST_PASSWORD=your-app-password
+export DJANGO_ADMIN_NOTIFICATION_EMAIL=manager@yourcompany.com
+```
+
+No code changes needed — `corazon/settings.py` switches to real SMTP automatically as
+soon as `DJANGO_EMAIL_HOST` is set. Any SMTP-based provider works here (Gmail with an
+App Password, SendGrid, Mailgun, Brevo, your own mail server, etc.).
 
 ---
 

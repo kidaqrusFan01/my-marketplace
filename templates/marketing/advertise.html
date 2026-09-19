@@ -1,55 +1,93 @@
 {% extends "base.html" %}
+{% load currency_filters %}
 {% block title %}Advertise With Us — Corazon Marketplace{% endblock %}
 
 {% block content %}
-<div class="content-page">
-  <h1>📢 Advertise With Us</h1>
-  <p>Reach thousands of active shoppers browsing Corazon Marketplace every day. Whether
-  you want to put your brand in front of buyers or post job openings on our Careers page,
-  we'd love to work with you.</p>
+<div class="content-page" style="max-width:1100px;">
+  <h1 style="text-align:center;">📢 Advertise With Us</h1>
+  <p style="text-align:center; max-width:600px; margin:0 auto 32px;">
+    Reach thousands of active shoppers browsing Corazon Marketplace every day. Higher
+    plans unlock more homepage advertising power and recruitment (job posting) reach.
+  </p>
 
-  <div class="advertise-options">
-    <div class="advertise-option-card">
-      <h3>🖼️ Banner Advertising</h3>
-      <p>Your banner featured in our homepage ad section, seen by shoppers as they browse
-      products across every category.</p>
+  <div class="pricing-toggle-wrap">
+    <div class="pricing-toggle" id="billingToggle">
+      <button type="button" class="pricing-toggle-btn active" data-period="monthly">Monthly</button>
+      <button type="button" class="pricing-toggle-btn" data-period="yearly">Yearly</button>
     </div>
-    <div class="advertise-option-card">
-      <h3>💼 Job Postings</h3>
-      <p>List your open roles on our Careers page and reach job seekers already engaging
-      with our platform.</p>
-    </div>
+    <span class="pricing-save-badge">Save {{ yearly_discount_percent }}% billed yearly</span>
   </div>
 
-  <h2>Tell us about your business</h2>
+  <div class="pricing-grid">
+    {% for plan in plans %}
+      <div class="pricing-card {% if plan.badge %}pricing-card--recommended{% endif %} {% if plan.key == selected_plan %}pricing-card--current{% endif %}">
+        {% if plan.badge %}<span class="pricing-badge">{{ plan.badge }}</span>{% endif %}
+        <h3>{{ plan.name }}</h3>
+        <p class="helptext">{{ plan.subtitle }}</p>
+        <div class="pricing-amount">
+          {% if plan.price == 0 %}
+            Free
+          {% else %}
+            <span class="price-monthly">{{ plan.price|naira }}<span class="pricing-period">/mo</span></span>
+            <span class="price-yearly" hidden>{{ plan.price_yearly|naira }}<span class="pricing-period">/yr</span></span>
+          {% endif %}
+        </div>
+        <ul class="pricing-features">
+          {% for feature in plan.features %}
+            <li>✓ {{ feature }}</li>
+          {% endfor %}
+        </ul>
+        <a href="{% url 'marketing:advertise' %}?plan={{ plan.key }}#inquiry-form" class="btn {% if plan.badge %}btn-primary{% else %}btn-outline{% endif %} btn-block">
+          {{ plan.cta_text }}
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <h2 id="inquiry-form" style="margin-top:48px;">Tell us about your business</h2>
   <p>Fill out the form below and our team will follow up by email with pricing and next
   steps — this isn't an instant checkout, a real person reviews every inquiry.</p>
 
   <div class="form-box">
+    {% if selected_plan %}
+      <p class="helptext" style="text-align:center; margin-top:-8px;">
+        You selected the <strong>{{ selected_plan|title }}</strong> plan — mention it below and we'll follow up with pricing details.
+      </p>
+    {% endif %}
     <form method="post">
       {% csrf_token %}
       {% for field in form %}
-        <div class="form-group">
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.is_hidden %}
           {{ field }}
-          {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
-        </div>
+        {% else %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+          </div>
+        {% endif %}
       {% endfor %}
       <button type="submit" class="btn btn-primary btn-block">Submit Inquiry</button>
     </form>
   </div>
-  <div class="bank-details-box">
-      <strong>Bank Transfer Details</strong>
-      <p>Account Name:  CorazondeLeon </p>
-      <p>Account Number: 0156519185 </p>
-      <p>Bank:  GTBank </p>
-    </div>
-    <a href="https://wa.me/{{ 08126242991}}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block" style="margin-top:14px;">
-      💬 Send Payment Proof on WhatsApp
-    </a>
-     <p class="helptext" style="margin-top:10px;">
-      Note: Please make payment using the above channel, other
-      payment method will be available soon!
-    </p>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('billingToggle');
+    if (!toggle) return;
+    const buttons = toggle.querySelectorAll('.pricing-toggle-btn');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        buttons.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        const yearly = btn.dataset.period === 'yearly';
+        document.querySelectorAll('.price-monthly').forEach(function (el) { el.hidden = yearly; });
+        document.querySelectorAll('.price-yearly').forEach(function (el) { el.hidden = !yearly; });
+      });
+    });
+  });
+</script>
 {% endblock %}

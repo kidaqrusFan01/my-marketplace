@@ -67,27 +67,41 @@ def terms_and_conditions(request):
 
 
 def advertise_with_us(request):
-    # Supports being linked to with a preselected inquiry type, e.g. the
-    # "we advertise jobs here" banner on the careers page links here with
-    # ?type=job_posting so the form opens with the right option chosen.
+    # Supports being linked to with a preselected inquiry type and/or plan,
+    # e.g. the "we advertise jobs here" banner on the careers page links
+    # here with ?type=job_posting, and each pricing card's button links
+    # here with ?plan=growth (see ADVERTISING_PLANS below).
+    from .constants import ADVERTISING_PLANS, ADVERTISING_PLAN_KEYS, ADVERTISING_YEARLY_DISCOUNT_PERCENT
     from .models import BusinessInquiry
+    from .notifications import notify_admin_new_inquiry
+
     initial_type = request.GET.get('type', 'advertising')
     if initial_type not in dict(BusinessInquiry.INQUIRY_TYPE_CHOICES):
         initial_type = 'advertising'
 
+    initial_plan = request.GET.get('plan', '')
+    if initial_plan not in ADVERTISING_PLAN_KEYS:
+        initial_plan = ''
+
     if request.method == 'POST':
         form = BusinessInquiryForm(request.POST)
         if form.is_valid():
-            form.save()
+            inquiry = form.save()
+            notify_admin_new_inquiry(inquiry)
             messages.success(
                 request,
                 "Thanks! Your inquiry was received — our team will reach out to you by email shortly."
             )
             return redirect('marketing:advertise')
     else:
-        form = BusinessInquiryForm(initial={'inquiry_type': initial_type})
+        form = BusinessInquiryForm(initial={'inquiry_type': initial_type, 'interested_plan': initial_plan})
 
-    return render(request, 'marketing/advertise.html', {'form': form})
+    return render(request, 'marketing/advertise.html', {
+        'form': form,
+        'plans': ADVERTISING_PLANS,
+        'yearly_discount_percent': ADVERTISING_YEARLY_DISCOUNT_PERCENT,
+        'selected_plan': initial_plan,
+    })
 
 
 def pricing(request):

@@ -15,7 +15,7 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'False'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
@@ -117,3 +117,40 @@ LOGOUT_REDIRECT_URL = 'products:home'
 # Max upload size (5 MB) for resumes / product images
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+
+# ----------------------------------------------------------------------
+# Email — used to notify the site admin/manager when someone submits the
+# Advertise With Us inquiry form (see marketing.notifications).
+#
+# By default this uses Django's console backend: "sending" an email just
+# prints it to the terminal/server log running `runserver`. That's fine
+# for local testing but is NOT real email delivery. To actually receive
+# these by email, set real SMTP credentials via environment variables
+# (e.g. a Gmail account with an App Password, or a transactional email
+# provider like SendGrid/Mailgun/Brevo) and this will switch over
+# automatically — no code changes needed:
+#
+#   export DJANGO_EMAIL_HOST=smtp.gmail.com
+#   export DJANGO_EMAIL_PORT=587
+#   export DJANGO_EMAIL_USE_TLS=True
+#   export DJANGO_EMAIL_HOST_USER=you@gmail.com
+#   export DJANGO_EMAIL_HOST_PASSWORD=your-app-password
+#   export DJANGO_ADMIN_NOTIFICATION_EMAIL=manager@yourcompany.com
+# ----------------------------------------------------------------------
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', '')
+
+if EMAIL_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', '587'))
+    EMAIL_USE_TLS = os.environ.get('DJANGO_EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD', '')
+else:
+    # No SMTP configured — print emails to the console instead of failing.
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_DEFAULT_FROM_EMAIL', 'noreply@corazonmarketplace.example')
+
+# Who receives inquiry notifications. Defaults to a placeholder — set
+# DJANGO_ADMIN_NOTIFICATION_EMAIL in production, or change this directly.
+ADMIN_NOTIFICATION_EMAIL = os.environ.get('DJANGO_ADMIN_NOTIFICATION_EMAIL', 'admin@corazonmarketplace.example')

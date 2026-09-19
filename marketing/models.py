@@ -65,6 +65,10 @@ class BusinessInquiry(models.Model):
     ]
 
     inquiry_type = models.CharField(max_length=20, choices=INQUIRY_TYPE_CHOICES, default='advertising')
+    interested_plan = models.CharField(
+        max_length=20, blank=True,
+        help_text="Which advertising plan tier they clicked on /advertise/, if any (e.g. 'growth')."
+    )
     company_name = models.CharField(max_length=150)
     contact_name = models.CharField(max_length=150)
     email = models.EmailField()
@@ -76,6 +80,14 @@ class BusinessInquiry(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = "Business inquiries"
+
+    @property
+    def interested_plan_display(self):
+        if not self.interested_plan:
+            return ''
+        from .constants import get_advertising_plan
+        plan = get_advertising_plan(self.interested_plan)
+        return plan['name'] if plan else self.interested_plan.title()
 
     def __str__(self):
         return f"{self.company_name} — {self.get_inquiry_type_display()}"

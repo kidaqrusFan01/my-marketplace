@@ -5,8 +5,9 @@ from .models import BusinessInquiry, VendorPlanRequest
 class BusinessInquiryForm(forms.ModelForm):
     class Meta:
         model = BusinessInquiry
-        fields = ['inquiry_type', 'company_name', 'contact_name', 'email', 'phone_number', 'message']
+        fields = ['inquiry_type', 'interested_plan', 'company_name', 'contact_name', 'email', 'phone_number', 'message']
         widgets = {
+            'interested_plan': forms.HiddenInput(),
             'company_name': forms.TextInput(attrs={'placeholder': 'Your company or brand name'}),
             'contact_name': forms.TextInput(attrs={'placeholder': 'Your full name'}),
             'email': forms.EmailInput(attrs={'placeholder': 'you@company.com'}),

@@ -19,7 +19,7 @@ class AdvertisementAdmin(admin.ModelAdmin):
 
 @admin.register(BusinessInquiry)
 class BusinessInquiryAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'inquiry_type', 'contact_name', 'email', 'status', 'created_at')
+    list_display = ('company_name', 'inquiry_type', 'interested_plan_display', 'contact_name', 'email', 'status', 'created_at')
     list_filter = ('inquiry_type', 'status')
     search_fields = ('company_name', 'contact_name', 'email')
     list_editable = ('status',)
