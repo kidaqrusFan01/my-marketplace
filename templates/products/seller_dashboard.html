@@ -6,11 +6,14 @@
   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
     <h1>Seller Dashboard</h1>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <a href="{% url 'products:vendor_page' %}" class="btn btn-outline">🏪 View Vendor Page</a>
+      <a href="{% url 'agents:home' %}" class="btn btn-outline">🎯 Agent Program</a>
       <a href="{% url 'products:product_create' %}" class="btn btn-primary">+ Add New Product</a>
     </div>
   </div>
   <p>Store: <strong>{{ request.user.store_name|default:request.user.username }}</strong></p>
+  {% if not request.user.is_agent %}
+    <p class="helptext">💡 Want to earn Loyalty Coin sharing products — yours or anyone else's? <a href="{% url 'agents:join' %}">Create your Agent profile</a>.</p>
+  {% endif %}
 
   <div class="vendor-plan-banner">
     <div>

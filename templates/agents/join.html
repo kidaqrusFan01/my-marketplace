@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Create Your Agent Profile — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="form-box">
+  <h2>🎯 Create Your Agent Profile</h2>
+  <p style="text-align:center;" class="helptext">
+    One quick step — how should we introduce you on your Agent Page?
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="form-errors">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-block">Create Profile &amp; Start Earning</button>
+  </form>
+</div>
+{% endblock %}

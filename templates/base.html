@@ -74,6 +74,7 @@
     <a href="{% url 'products:home' %}">All</a>
     <a href="{% url 'jobs:job_list' %}">Careers</a>
     <a href="{% url 'marketing:advertise' %}">📢 Advertise With Us</a>
+    <a href="{% url 'agents:home' %}">🎯 {% if user.is_agent %}Agent Page{% else %}Become an Agent{% endif %}</a>
     {% if user.is_authenticated and user.is_seller %}
       <a href="{% url 'products:product_create' %}">Sell a Product</a>
     {% elif not user.is_authenticated %}
@@ -115,9 +116,9 @@
         <a href="{% url 'accounts:profile' %}">Profile</a>
         <a href="{% url 'orders:order_history' %}">Your Orders</a>
         <a href="{% url 'loyalty:wallet' %}">&#129689; Loyalty Coin ({{ loyalty_points_balance }} pts)</a>
+        <a href="{% url 'agents:home' %}">🎯 {% if user.is_agent %}Agent Page{% else %}Become an Agent{% endif %}</a>
         {% if user.is_seller %}
           <a href="{% url 'products:seller_dashboard' %}">Seller Dashboard</a>
-          <a href="{% url 'products:vendor_page' %}">Vendor Page</a>
           <a href="{% url 'products:product_create' %}">Add a Product</a>
         {% endif %}
         <form action="{% url 'accounts:logout' %}" method="post">
@@ -188,7 +189,7 @@
         <a href="{% url 'marketing:terms' %}">Terms &amp; Conditions</a>
       </div>
     </div>
-    <p class="footer-copyright">&copy; {% now "Y" %} Corazon Marketplace. All rights reserved.</p>
+    <p class="footer-copyright">&copy; {% now "Y" %} Corazon Marketplace. All rights reserved. (Demo project)</p>
   </footer>
 
   <!-- ============ LIVE ACTIVITY TOAST ============ -->

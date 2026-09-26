@@ -14,6 +14,13 @@ class CustomUser(AbstractUser):
         default=False,
         help_text="Designates whether this user can sell products on the marketplace."
     )
+    is_agent = models.BooleanField(
+        default=False,
+        help_text="Designates whether this user has an Agent profile — earning Loyalty "
+                   "Coin by sharing and referring products, independent of whether they "
+                   "also sell anything themselves. Set automatically when they create an "
+                   "AgentProfile (see the `agents` app)."
+    )
     phone_number = models.CharField(max_length=20, blank=True)
     address = models.CharField(max_length=255, blank=True)
     store_name = models.CharField(

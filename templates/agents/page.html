@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load currency_filters %}
+{% block title %}My Agent Page — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<h1>🎯 My Agent Page</h1>
+
+<!-- ============ AGENT DETAILS ============ -->
+<div class="agent-profile-card">
+  <div class="agent-profile-avatar">{{ profile.display_name|first|upper }}</div>
+  <div class="agent-profile-info">
+    <h2>{{ profile.display_name }}</h2>
+    <p class="helptext">@{{ request.user.username }} &middot; Agent since {{ profile.created_at|date:"M Y" }}</p>
+    {% if profile.bio %}<p>{{ profile.bio }}</p>{% endif %}
+  </div>
+</div>
+
+<!-- ============ REFERRAL LINK ============ -->
+<div class="card">
+  <h3 style="margin-top:0;">Your Referral Link</h3>
+  <p class="helptext">Share this link anywhere — every purchase it leads to is credited back to you.</p>
+  <div class="referral-link-box">
+    <input type="text" readonly value="{{ referral_url }}" onclick="this.select();">
+    <button type="button" class="btn btn-primary btn-sm" id="copyAgentReferralBtn" data-copy-url="{{ referral_url }}">Copy</button>
+  </div>
+</div>
+
+<!-- ============ STATS ============ -->
+<div class="agent-stats-grid">
+  <div class="agent-stat-box">
+    <span class="agent-stat-value">{{ total_shares }}</span>
+    <span class="agent-stat-label">Products Shared</span>
+  </div>
+  <div class="agent-stat-box agent-stat-box--highlight">
+    <span class="agent-stat-value">{{ total_share_bonus }} pts</span>
+    <span class="agent-stat-label">Bonus Earned From Sharing</span>
+  </div>
+  <div class="agent-stat-box agent-stat-box--highlight">
+    <span class="agent-stat-value">{{ referral_bonus }} pts</span>
+    <span class="agent-stat-label">Bonus Earned From Referrals</span>
+  </div>
+  <div class="agent-stat-box">
+    <span class="agent-stat-value">{{ loyalty_balance }} pts</span>
+    <span class="agent-stat-label">Current Loyalty Balance</span>
+  </div>
+</div>
+
+<!-- ============ PRODUCTS SHARED ============ -->
+<h2 class="section-title">Products You've Shared</h2>
+<p class="helptext">Any product on Corazon Marketplace — not just your own — earns you Loyalty Coin when you share it.</p>
+
+<div class="card" style="overflow-x:auto;">
+  <table class="dash-table">
+    <thead>
+      <tr><th>Product</th><th>Times Shared</th><th>Points Earned</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for entry in shared_products %}
+        <tr>
+          <td style="display:flex; align-items:center; gap:8px;">
+            {% if entry.product.image %}<img src="{{ entry.product.image.url }}" alt="">{% else %}<img src="https://placehold.co/50x50" alt="">{% endif %}
+            {{ entry.product.name }}
+          </td>
+          <td>{{ entry.share_count }}</td>
+          <td style="color:var(--success); font-weight:600;">+{{ entry.points_earned }}</td>
+          <td><a href="{{ entry.product.get_absolute_url }}" class="btn btn-sm btn-outline">View</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">You haven't shared any products yet. Browse the <a href="{% url 'products:home' %}">marketplace</a> and hit "Share" on anything you like to start earning.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const copyBtn = document.getElementById('copyAgentReferralBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        const url = copyBtn.dataset.copyUrl;
+        const originalText = copyBtn.textContent;
+        navigator.clipboard.writeText(url).then(function () {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function () { copyBtn.textContent = originalText; }, 2000);
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

@@ -50,10 +50,10 @@ section where applicants can apply for jobs.
 - **Vendor product sharing** — every product row in the Seller Dashboard has its own
   Share button (X/Twitter, Facebook, WhatsApp, copy link), tagged with the seller's
   referral code so promoting their own listings also earns them Loyalty Coin.
-- **Vendor Page** — a seller's own profile & sharing-performance page: their store
-  details, product counts, current plan, total bonus points earned from sharing their
-  own products, and a "Product Reach" breakdown of how often each product has been
-  shared by anyone (not just them).
+- **Agent Program** — a standalone role, independent of selling anything: any user creates
+  an Agent profile (`/agent/`) and gets their own page showing their referral link, total
+  bonus earned from sharing, bonus earned from referrals, and a breakdown of every
+  product they've shared across the whole marketplace — not just their own listings.
 - **Superuser admin** — full Django admin access to every model (users, products, orders,
   jobs, applications, reviews, loyalty accounts/transactions, redemption requests,
   advertisements, business inquiries, vendor plans) for the site owner.
@@ -203,7 +203,38 @@ Visit:
 | Vendor pricing plans | `/pricing/` (also linked from the footer) — log in as a seller to actually request a plan; the Free plan applies instantly, paid plans create a pending request |
 | Confirm & activate a paid plan | `/admin/` → Marketing & Site Content → Vendor plan requests → select a pending request → action dropdown → "Confirm payment & activate the requested plan" |
 | Vendor product sharing | Log in as a seller, go to `/seller/dashboard/` — every product row has its own Share button in the rightmost column |
-| Vendor Page | Log in as a seller, go to `/seller/vendor-page/` (also linked from the Seller Dashboard header and mobile sidebar) — share a couple of your own products first so the stats aren't empty |
+| Agent Program | Visit `/agent/` (also linked in the top nav and mobile sidebar — no seller account needed) — create a profile, then share any product on the site and revisit your Agent Page to see the stats update |
+
+---
+
+## Agent Program — how it works
+
+> **Naming note:** there are two unrelated things in this project that both used the
+> word "vendor" at different points, and it's worth being precise about which is which:
+> - **Vendor Pricing Plans** (below) are about a **seller's own product listing placement**
+>   — paying for better visibility of things they sell. This is unchanged.
+> - The **Agent Program** (this section) used to be called the "Vendor Page" in an
+>   earlier version of this project. It has nothing to do with selling — it's a role
+>   anyone can take on to earn Loyalty Coin by sharing and referring products.
+
+An Agent is independent of `is_seller` entirely — a customer who has never listed a
+single product can become an Agent and start earning. The flow:
+
+1. Visit `/agent/` (linked in the top nav for everyone, and in the mobile sidebar).
+2. Not an Agent yet → see an explainer page with a "Create Your Agent Profile" button.
+3. Fill in a display name (and optional bio) at `/agent/join/` — this is the "must
+   create a profile" step; submitting it sets `CustomUser.is_agent = True` and creates
+   an `AgentProfile` row.
+4. From then on, `/agent/` takes you straight to your own Agent Page: your referral
+   link, total products shared, bonus earned from sharing, bonus earned from referrals,
+   current Loyalty Coin balance, and a table of every product you've shared (any
+   product on the site, not just your own listings, since you don't need to sell
+   anything to be an Agent).
+
+Technically this lives in its own Django app, `agents/` — not nested inside `products`
+or `accounts` — with its own models, views, templates, URLs (`/agent/...`), and its own
+"Agent Program" section in `/admin/`, per the ask that this stand on its own rather than
+live inside the seller pages.
 
 ---
 

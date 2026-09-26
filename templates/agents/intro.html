@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Become an Agent — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div class="content-page" style="max-width:720px; text-align:center;">
+  <h1>🎯 Become an Agent</h1>
+  <p style="font-size:16px;">
+    Earn Loyalty Coin by sharing products across Corazon Marketplace — yours or anyone
+    else's. No need to sell anything yourself.
+  </p>
+
+  <div class="advertise-options" style="text-align:left; margin-top:28px;">
+    <div class="advertise-option-card">
+      <h3>🔗 Share &amp; Earn</h3>
+      <p>Get a personal referral link. Share any product you like — the more you share,
+      the more Loyalty Coin you earn.</p>
+    </div>
+    <div class="advertise-option-card">
+      <h3>🎁 Bigger Bonus for Referrals</h3>
+      <p>When your link brings in a brand new buyer, you earn an even bigger bonus —
+      on top of your regular sharing points.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;">
+    {% if user.is_authenticated %}
+      <a href="{% url 'agents:join' %}" class="btn btn-primary">Create Your Agent Profile</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}?next={% url 'agents:join' %}" class="btn btn-primary">Sign In to Get Started</a>
+      <p class="helptext" style="margin-top:10px;">Don't have an account? <a href="{% url 'accounts:signup_customer' %}">Sign up</a> first — it only takes a minute.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1051,6 +1051,126 @@ footer a:hover { color: var(--white); text-decoration: underline; }
   .advertise-options { grid-template-columns: 1fr; }
 }
 
+.advertise-eyebrow {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+
+.advertise-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0 44px;
+}
+.advertise-stat {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px 14px;
+  text-align: center;
+}
+.advertise-stat-value { display: block; font-family: var(--font-heading); font-size: 28px; font-weight: 700; color: var(--price-red); }
+.advertise-stat-label { display: block; font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+.advertise-why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 20px 0 44px;
+}
+.advertise-why-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  position: relative;
+}
+.advertise-why-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--navy-dark);
+  font-weight: 700;
+  font-family: var(--font-heading);
+  margin-bottom: 12px;
+}
+.advertise-why-card h3 { margin: 0 0 8px; font-size: 16px; }
+.advertise-why-card p { font-size: 13px; line-height: 1.6; margin: 0; }
+
+.advertise-steps { display: flex; flex-direction: column; gap: 14px; margin: 20px 0 44px; }
+.advertise-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+.advertise-step-num {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(120deg, var(--navy-dark), var(--navy-mid));
+  color: var(--yellow-badge);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.advertise-step strong { display: block; font-size: 15px; margin-bottom: 4px; }
+.advertise-step p { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+.advertise-tool-groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin: 8px 0 44px;
+}
+.advertise-tool-group {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.advertise-tool-group h3 { margin-top: 0; font-size: 15px; color: var(--link-blue); }
+.advertise-tool-list { list-style: none; padding: 0; margin: 0; }
+.advertise-tool-list li { font-size: 13px; line-height: 1.6; margin-bottom: 10px; padding-left: 18px; position: relative; }
+.advertise-tool-list li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: 700; }
+
+.advertise-scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin: 20px 0 44px;
+}
+.advertise-scenario-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.advertise-scenario-card h3 { margin: 10px 0 8px; }
+.advertise-scenario-card p { font-size: 13px; line-height: 1.6; margin: 0; }
+
+@media (max-width: 900px) {
+  .advertise-stats-row { grid-template-columns: 1fr; }
+  .advertise-why-grid { grid-template-columns: 1fr; }
+  .advertise-tool-groups { grid-template-columns: 1fr; }
+  .advertise-scenario-grid { grid-template-columns: 1fr; }
+}
+
 /* ---------------- Recruitment banner (Careers page) ---------------- */
 .recruit-banner {
   background: linear-gradient(120deg, var(--navy-dark), var(--navy-mid));
@@ -1083,8 +1203,8 @@ footer a:hover { color: var(--white); text-decoration: underline; }
 .vendor-plan-banner strong { display: block; font-family: var(--font-heading); }
 .vendor-plan-banner span { font-size: 13px; color: rgba(255,255,255,0.8); }
 
-/* ---------------- Vendor page ---------------- */
-.vendor-profile-card {
+/* ---------------- Agent page ---------------- */
+.agent-profile-card {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -1095,7 +1215,7 @@ footer a:hover { color: var(--white); text-decoration: underline; }
   margin: 16px 0 24px;
   flex-wrap: wrap;
 }
-.vendor-profile-avatar {
+.agent-profile-avatar {
   width: 64px;
   height: 64px;
   flex-shrink: 0;
@@ -1109,33 +1229,30 @@ footer a:hover { color: var(--white); text-decoration: underline; }
   align-items: center;
   justify-content: center;
 }
-.vendor-profile-info { flex: 1; min-width: 200px; }
-.vendor-profile-info h2 { margin: 0 0 2px; }
-.vendor-profile-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; font-size: 13px; color: var(--text-muted); }
-.vendor-profile-plan { text-align: right; }
+.agent-profile-info { flex: 1; min-width: 200px; }
+.agent-profile-info h2 { margin: 0 0 2px; }
 
-.vendor-stats-grid {
+.agent-stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
-  margin-bottom: 24px;
+  margin: 20px 0 24px;
 }
-.vendor-stat-box {
+.agent-stat-box {
   background: var(--white);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   padding: 18px 14px;
   text-align: center;
 }
-.vendor-stat-box--highlight { background: linear-gradient(120deg, var(--navy-dark), var(--navy-mid)); }
-.vendor-stat-box--highlight .vendor-stat-value { color: var(--yellow-badge); }
-.vendor-stat-box--highlight .vendor-stat-label { color: rgba(255,255,255,0.75); }
-.vendor-stat-value { display: block; font-family: var(--font-heading); font-size: 24px; font-weight: 700; }
-.vendor-stat-label { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.agent-stat-box--highlight { background: linear-gradient(120deg, var(--navy-dark), var(--navy-mid)); }
+.agent-stat-box--highlight .agent-stat-value { color: var(--yellow-badge); }
+.agent-stat-box--highlight .agent-stat-label { color: rgba(255,255,255,0.75); }
+.agent-stat-value { display: block; font-family: var(--font-heading); font-size: 24px; font-weight: 700; }
+.agent-stat-label { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
 @media (max-width: 900px) {
-  .vendor-stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .vendor-profile-plan { text-align: left; width: 100%; }
+  .agent-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ---------------- Pricing page ---------------- */
