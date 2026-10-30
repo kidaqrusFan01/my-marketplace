@@ -16,6 +16,24 @@ class Cart:
         if not cart:
             cart = self.session[CART_SESSION_ID] = {}
         self.cart = cart
+        self._drop_unavailable_items()
+
+    def _drop_unavailable_items(self):
+        """If a product was added to the cart and later became hidden (seller
+        switched it off, or an admin revoked the seller's approval), quietly
+        remove it so checkout never tries to sell something shoppers can no
+        longer see."""
+        if not self.cart:
+            return
+        still_visible = set(
+            str(pk) for pk in Product.objects.visible()
+            .filter(id__in=self.cart.keys()).values_list('id', flat=True)
+        )
+        stale = [pid for pid in self.cart if pid not in still_visible]
+        for pid in stale:
+            del self.cart[pid]
+        if stale:
+            self.save()
 
     def add(self, product, quantity=1, override_quantity=False):
         product_id = str(product.id)
@@ -48,7 +66,7 @@ class Cart:
 
     def __iter__(self):
         product_ids = self.cart.keys()
-        products = Product.objects.filter(id__in=product_ids)
+        products = Product.objects.visible().filter(id__in=product_ids)
         cart = self.cart.copy()
         for product in products:
             cart[str(product.id)]['product'] = product

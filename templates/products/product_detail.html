@@ -3,6 +3,11 @@
 {% block title %}{{ product.name }} — Corazon Marketplace{% endblock %}
 
 {% block content %}
+{% if is_pending_preview %}
+  <div class="approval-pending-banner">
+    👁️ <strong>Preview only.</strong> This product isn't visible to shoppers yet — it will appear once it's active and the seller's account is approved by an admin.
+  </div>
+{% endif %}
 <div class="pdp-layout">
   <div class="detail-image">
     {% if product.image %}
@@ -53,6 +58,7 @@
     </div>
 
     <!-- Share button -->
+    {% if not is_pending_preview %}
     <div class="share-widget">
       <button type="button" class="btn btn-outline btn-sm share-toggle"
               data-share-url="{{ share_url }}" data-share-title="{{ product.name }}" data-product-id="{{ product.id }}"
@@ -68,6 +74,7 @@
         <button type="button" class="share-copy-btn" data-copy-url="{{ share_url }}">Copy Link</button>
       </div>
     </div>
+    {% endif %}
 
     <hr>
     <p>{{ product.description|linebreaks }}</p>

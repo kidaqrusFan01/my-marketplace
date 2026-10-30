@@ -25,6 +25,17 @@ class Category(models.Model):
         return self.name
 
 
+class ProductQuerySet(models.QuerySet):
+    def visible(self):
+        """
+        Products shoppers are allowed to see: switched on by the seller AND
+        belonging to a seller an admin has approved. This is the single
+        place that rule lives — every public page (homepage, search,
+        product page, cart, sharing, Deal of the Day) goes through it.
+        """
+        return self.filter(is_active=True, seller__is_approved=True)
+
+
 class Product(models.Model):
     seller = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
@@ -46,6 +57,8 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = ProductQuerySet.as_manager()
 
     class Meta:
         ordering = ['-created_at']
@@ -226,7 +239,8 @@ class DealOfTheDay(models.Model):
         from django.utils import timezone
         now = timezone.now()
         return cls.objects.filter(
-            is_active=True, starts_at__lte=now, ends_at__gte=now
+            is_active=True, starts_at__lte=now, ends_at__gte=now,
+            product__is_active=True, product__seller__is_approved=True,
         ).select_related('product', 'product__category').order_by('starts_at').first()
 
     def __str__(self):

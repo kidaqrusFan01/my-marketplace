@@ -3,6 +3,7 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -111,7 +112,7 @@ def home(request):
     query = request.GET.get('q', '').strip()
     category_slug = request.GET.get('category', '')
 
-    products = Product.objects.filter(is_active=True)
+    products = Product.objects.visible()
 
     if query:
         products = products.filter(
@@ -121,7 +122,7 @@ def home(request):
         products = products.filter(category__slug=category_slug)
 
     categories = Category.objects.all()
-    featured_products = Product.objects.filter(is_active=True).order_by('-created_at')[:8]
+    featured_products = Product.objects.visible().order_by('-created_at')[:8]
 
     paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
@@ -147,10 +148,24 @@ def home(request):
 
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product, slug=slug, is_active=True)
+    product = get_object_or_404(Product, slug=slug)
+    # Shoppers only see products that are switched on AND whose seller an
+    # admin has approved. The owner and admins can still open their own
+    # pending listing to preview it — everyone else gets a 404, exactly as
+    # if the product didn't exist.
+    # Only the owning seller or a true admin may preview an unapproved
+    # product. NOT is_staff: every seller is staff (that's how they reach
+    # their product admin), so is_staff would let any seller browse a
+    # competitor's hidden listings.
+    can_preview = request.user.is_authenticated and (
+        request.user.is_superuser or product.seller_id == request.user.id
+    )
+    is_publicly_visible = product.is_active and product.seller.is_approved
+    if not is_publicly_visible and not can_preview:
+        raise Http404("Product not found")
     reviews = product.reviews.all()
-    related_products = Product.objects.filter(
-        category=product.category, is_active=True
+    related_products = Product.objects.visible().filter(
+        category=product.category
     ).exclude(pk=product.pk)[:4]
 
     from loyalty.services import product_is_current_deal
@@ -180,6 +195,7 @@ def product_detail(request, slug):
         'review_form': review_form,
         'share_url': build_referral_share_url(request, product.get_absolute_url()),
         'is_deal_of_day': is_deal_of_day,
+        'is_pending_preview': not is_publicly_visible,
     }
     return render(request, 'products/product_detail.html', context)
 

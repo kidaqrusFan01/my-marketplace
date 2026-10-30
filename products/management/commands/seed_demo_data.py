@@ -25,6 +25,11 @@ class Command(BaseCommand):
         if created:
             seller.set_password('sellerpass123')
             seller.save()
+        # Demo seller is pre-approved so the demo catalog is visible. Real
+        # sellers who register on the site start unapproved (see accounts).
+        if not seller.is_approved:
+            seller.is_approved = True
+            seller.save(update_fields=['is_approved'])
             self.stdout.write(self.style.SUCCESS("Created demo seller: demo_seller / sellerpass123"))
 
         # --- Categories ---

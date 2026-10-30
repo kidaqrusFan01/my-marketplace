@@ -81,7 +81,8 @@
       <a href="{% url 'accounts:signup_seller' %}">Become a Seller</a>
     {% endif %}
     <a href="{% url 'orders:order_history' %}">Your Orders</a>
-    <a href="/admin/">Admin</a>
+    <a href="/admin/">Admin{% if pending_approvals_count %} <span class="nav-pending-badge" title="Sellers awaiting approval">{{ pending_approvals_count }}</span>{% endif %}</a>
+    {% if pending_approvals_count %}<a href="/admin/accounts/customuser/?approval=pending" class="nav-pending-link">⏳ {{ pending_approvals_count }} seller{{ pending_approvals_count|pluralize }} awaiting approval</a>{% endif %}
     <span class="live-indicator hide-mobile"><span class="live-dot"></span> Live</span>
   </div>
 

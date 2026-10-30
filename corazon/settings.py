@@ -67,6 +67,7 @@ TEMPLATES = [
                 'cart.context_processors.cart_summary',
                 'products.context_processors.all_categories',
                 'loyalty.context_processors.loyalty_balance',
+                'accounts.context_processors.pending_approvals',
             ],
         },
     },

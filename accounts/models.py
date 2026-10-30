@@ -21,6 +21,12 @@ class CustomUser(AbstractUser):
                    "also sell anything themselves. Set automatically when they create an "
                    "AgentProfile (see the `agents` app)."
     )
+    is_approved = models.BooleanField(
+        default=False,
+        help_text="Admin approval. A seller's products are only visible to shoppers once an "
+                   "admin has approved their registration. Only admins can change this."
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
     address = models.CharField(max_length=255, blank=True)
     store_name = models.CharField(
@@ -47,6 +53,11 @@ class CustomUser(AbstractUser):
     def save(self, *args, **kwargs):
         if not self.referral_code:
             self.referral_code = self._generate_unique_referral_code()
+        # Superusers are the admins who do the approving — never leave them pending.
+        if self.is_superuser and not self.is_approved:
+            from django.utils import timezone
+            self.is_approved = True
+            self.approved_at = timezone.now()
         super().save(*args, **kwargs)
 
     @classmethod

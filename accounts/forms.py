@@ -14,6 +14,9 @@ class CustomerSignUpForm(UserCreationForm):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.is_seller = False
+        # Customers don't list products, so there's nothing for an admin to
+        # approve — only seller registrations go through the approval queue.
+        user.is_approved = True
         if commit:
             user.save()
         return user

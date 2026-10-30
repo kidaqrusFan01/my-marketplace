@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 
 from .forms import CustomerSignUpForm, SellerSignUpForm, ProfileUpdateForm
 from .models import CustomUser
+from .notifications import notify_admin_new_registration
 from orders.models import Order
 
 
@@ -44,6 +45,7 @@ class CustomerSignUpView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         _attach_referrer(self.request, self.object)
+        notify_admin_new_registration(self.object, self.request)
         login(self.request, self.object)
         messages.success(self.request, "Welcome to Corazon Marketplace! Your account was created.")
         return response
@@ -62,8 +64,13 @@ class SellerSignUpView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         _attach_referrer(self.request, self.object)
+        notify_admin_new_registration(self.object, self.request)
         login(self.request, self.object)
-        messages.success(self.request, "Welcome, seller! You can now list products from your dashboard.")
+        messages.success(
+            self.request,
+            "Welcome, seller! Your registration is pending admin approval. You can add products "
+            "now, but shoppers won't see them until an admin approves your account."
+        )
         return response
 
 

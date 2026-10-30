@@ -50,6 +50,8 @@ section where applicants can apply for jobs.
 - **Vendor product sharing** — every product row in the Seller Dashboard has its own
   Share button (X/Twitter, Facebook, WhatsApp, copy link), tagged with the seller's
   referral code so promoting their own listings also earns them Loyalty Coin.
+- **Admin approval for sellers** — every seller registration alerts the admin and stays
+  unapproved (products hidden from shoppers) until an admin approves it in `/admin/`.
 - **Agent Program** — a standalone role, independent of selling anything: any user creates
   an Agent profile (`/agent/`) and gets their own page showing their referral link, total
   bonus earned from sharing, bonus earned from referrals, and a breakdown of every
@@ -106,6 +108,8 @@ pip install -r requirements.txt
 ```
 
 ### 3. Database — run migrations every time you update (important!)
+
+> This update adds `accounts.0005_user_approval` (seller approval). Run `python manage.py migrate` before starting the server.
 
 > ⚠️ **This project has been updated with new database tables again** — this round adds
 > the `marketing` app (Advertisements, Business/Advertising inquiries) on top of last
@@ -204,6 +208,38 @@ Visit:
 | Confirm & activate a paid plan | `/admin/` → Marketing & Site Content → Vendor plan requests → select a pending request → action dropdown → "Confirm payment & activate the requested plan" |
 | Vendor product sharing | Log in as a seller, go to `/seller/dashboard/` — every product row has its own Share button in the rightmost column |
 | Agent Program | Visit `/agent/` (also linked in the top nav and mobile sidebar — no seller account needed) — create a profile, then share any product on the site and revisit your Agent Page to see the stats update |
+
+---
+
+## Registration Alerts & Seller Approval — how it works
+
+Nothing a seller lists is visible to shoppers until an admin approves that seller.
+
+1. **Someone registers** (customer *or* seller) → an email goes to
+   `ADMIN_NOTIFICATION_EMAIL` with who they are. Seller emails are marked
+   **"approval needed"** and link straight to the account in `/admin/`. (Email delivery
+   uses the same settings as the Advertise With Us alerts: it prints to the terminal by
+   default and sends for real once you set the `DJANGO_EMAIL_*` variables — see that
+   section.)
+2. **The admin is alerted inside the site too** — a yellow banner on the `/admin/` home
+   page ("3 seller registrations awaiting your approval → Review now"), and a red count
+   badge on the **Admin** link in the storefront's top nav (visible to superusers only).
+3. **New sellers start unapproved.** They can log in, add and edit products, and preview
+   their own listings, but those products are hidden everywhere shoppers look: homepage,
+   search, category pages, product pages (404), Deal of the Day, cart, and sharing.
+   Their dashboard explains that they're awaiting approval.
+4. **Only an admin can approve.** In `/admin/` → Users, use the **"Seller approval →
+   Pending sellers"** filter, tick the sellers, and run **"Approve selected sellers"**
+   (or tick *Is approved* on a single user). **"Revoke approval"** hides their products
+   again at any time — items already in a shopper's cart are removed automatically.
+   Sellers are staff (so they can manage their own products) but have no permission on
+   user accounts, and approval isn't editable from any seller-facing form, so a seller
+   can never approve themselves or anyone else.
+
+Customers never need approval — only seller registrations enter the queue. Sellers who
+registered **before** this feature existed were automatically approved by the migration,
+so existing listings don't disappear after you upgrade. Run the tests that prove all of
+the above with `python manage.py test accounts`.
 
 ---
 

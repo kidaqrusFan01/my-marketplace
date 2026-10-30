@@ -15,6 +15,16 @@
     <p class="helptext">💡 Want to earn Loyalty Coin sharing products — yours or anyone else's? <a href="{% url 'agents:join' %}">Create your Agent profile</a>.</p>
   {% endif %}
 
+  {% if not request.user.is_approved %}
+    <div class="approval-pending-banner">
+      <strong>⏳ Your seller account is awaiting admin approval.</strong>
+      You can add and edit products now, but shoppers can't see them until an admin approves your account.
+      We've notified the admin — you'll be live as soon as you're approved.
+    </div>
+  {% else %}
+    <div class="approval-approved-banner">✅ Your seller account is approved — your active products are live on the marketplace.</div>
+  {% endif %}
+
   <div class="vendor-plan-banner">
     <div>
       <strong>Your listing plan: {{ current_plan|title }}</strong>
@@ -60,6 +70,7 @@
               <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-sm btn-danger">Delete</a>
             </td>
             <td>
+              {% if request.user.is_approved %}
               <div class="share-widget">
                 <button type="button" class="btn btn-sm btn-outline share-toggle"
                         data-share-url="{{ row.share_url }}"
@@ -75,6 +86,9 @@
                   <button type="button" class="share-copy-btn" data-copy-url="{{ row.share_url }}">Copy Link</button>
                 </div>
               </div>
+              {% else %}
+                <span class="helptext">Available once approved</span>
+              {% endif %}
             </td>
           </tr>
           {% endwith %}

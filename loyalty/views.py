@@ -65,7 +65,7 @@ def track_share(request, product_id):
     user, per product, per day so spam-clicking Share can't farm points.
     Deal of the Day products earn double.
     """
-    product = get_object_or_404(Product, id=product_id, is_active=True)
+    product = get_object_or_404(Product.objects.visible(), id=product_id)
     account = LoyaltyAccount.get_or_create_for(request.user)
 
     today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)

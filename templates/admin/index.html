@@ -1,0 +1,19 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+{% if pending_approvals_count %}
+  <div class="pending-approval-alert">
+    <strong>⏳ {{ pending_approvals_count }} seller registration{{ pending_approvals_count|pluralize }} awaiting your approval.</strong>
+    Their products stay hidden from shoppers until you approve them.
+    <a href="{% url 'admin:accounts_customuser_changelist' %}?approval=pending">Review now &rarr;</a>
+  </div>
+  <style>
+    .pending-approval-alert {
+      background: #fff3cd; border: 1px solid #ffeeba; color: #664d03;
+      border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 14px;
+    }
+    .pending-approval-alert a { font-weight: 700; margin-left: 8px; }
+  </style>
+{% endif %}
+{{ block.super }}
+{% endblock %}

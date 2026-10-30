@@ -1427,3 +1427,37 @@ footer a:hover { color: var(--white); text-decoration: underline; }
   .search-form button { padding: 0 12px; }
   .cart-link .hide-mobile { display: none; }
 }
+
+/* ---------------- Admin approval alerts (superusers only) ---------------- */
+.nav-pending-badge {
+  display: inline-block;
+  background: #e53935;
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  margin-left: 4px;
+}
+.nav-pending-link { color: var(--yellow-badge); font-weight: 600; }
+
+/* ---------------- Seller approval banners ---------------- */
+.approval-pending-banner {
+  background: #fff8e6;
+  border: 1px solid #ffeeba;
+  color: #664d03;
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.approval-approved-banner {
+  background: #eafaf0;
+  border: 1px solid #c3e6cb;
+  color: #0f6b3a;
+  border-radius: var(--radius-lg);
+  padding: 10px 18px;
+  margin: 14px 0;
+  font-size: 13px;
+}
