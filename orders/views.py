@@ -4,10 +4,12 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 
 from cart.cart import Cart
+from products.views import seller_required
 from loyalty.models import LoyaltyAccount
 from loyalty.services import award_purchase_points
 from .forms import OrderCreateForm
 from .models import Order, OrderItem
+from .notifications import notify_sellers_of_order, notify_agents_of_shared_order
 
 
 @login_required
@@ -61,6 +63,12 @@ def order_create(request):
             # after the order (and its items) are committed.
             award_purchase_points(order)
 
+            # Let each seller know their product was ordered.
+            notify_sellers_of_order(order, request)
+
+            # ...and tell any Agent whose shared link brought this customer.
+            notify_agents_of_shared_order(order, request)
+
             cart.clear()
             messages.success(request, "Your order was placed successfully!")
             return redirect('orders:order_complete', order_id=order.id)
@@ -88,3 +96,24 @@ def order_complete(request, order_id):
 def order_history(request):
     orders = Order.objects.filter(customer=request.user)
     return render(request, 'orders/history.html', {'orders': orders})
+
+
+@seller_required
+def seller_orders(request):
+    """
+    "Orders Received": every order that includes this seller's products,
+    newest first, showing ONLY this seller's line items (never another
+    seller's items from the same order) plus the delivery details they
+    need to fulfil it.
+    """
+    items = (
+        OrderItem.objects.filter(product__seller=request.user)
+        .select_related('order', 'product')
+        .order_by('-order__created_at', 'id')
+    )
+    grouped = {}
+    for item in items:
+        entry = grouped.setdefault(item.order_id, {'order': item.order, 'items': [], 'total': 0})
+        entry['items'].append(item)
+        entry['total'] += item.get_cost()
+    return render(request, 'orders/seller_orders.html', {'received': list(grouped.values())})

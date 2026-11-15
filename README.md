@@ -50,6 +50,10 @@ section where applicants can apply for jobs.
 - **Vendor product sharing** — every product row in the Seller Dashboard has its own
   Share button (X/Twitter, Facebook, WhatsApp, copy link), tagged with the seller's
   referral code so promoting their own listings also earns them Loyalty Coin.
+- **Order alerts for sellers** — when someone places an order, each seller involved gets an
+  email, a 🔔 in-site alert, and an Orders Received page with delivery details.
+- **Order alerts for agents** — an agent is alerted when a customer who came through their
+  link orders a product they shared (no buyer details shared).
 - **Admin approval for sellers** — every seller registration alerts the admin and stays
   unapproved (products hidden from shoppers) until an admin approves it in `/admin/`.
 - **Agent Program** — a standalone role, independent of selling anything: any user creates
@@ -109,7 +113,7 @@ pip install -r requirements.txt
 
 ### 3. Database — run migrations every time you update (important!)
 
-> This update adds `accounts.0005_user_approval` (seller approval). Run `python manage.py migrate` before starting the server.
+> Recent updates add `accounts.0005_user_approval`, `notifications.0001_initial` and `notifications.0002_alter_notification_kind`. Run `python manage.py migrate` before starting the server.
 
 > ⚠️ **This project has been updated with new database tables again** — this round adds
 > the `marketing` app (Advertisements, Business/Advertising inquiries) on top of last
@@ -208,6 +212,61 @@ Visit:
 | Confirm & activate a paid plan | `/admin/` → Marketing & Site Content → Vendor plan requests → select a pending request → action dropdown → "Confirm payment & activate the requested plan" |
 | Vendor product sharing | Log in as a seller, go to `/seller/dashboard/` — every product row has its own Share button in the rightmost column |
 | Agent Program | Visit `/agent/` (also linked in the top nav and mobile sidebar — no seller account needed) — create a profile, then share any product on the site and revisit your Agent Page to see the stats update |
+
+---
+
+## Order Alerts for Sellers — how it works
+
+When a customer **actually places an order** (completes checkout, not when they just add
+to cart), every seller whose products are in it is told:
+
+1. **Email** to the seller's account email: order number, the quantity and name of *their*
+   items, and their items' total, with a link to their Orders Received page. It
+   deliberately leaves out the buyer's address and phone number.
+2. **In-site alert**: a 🔔 bell in the top nav with a red unread count (also in the mobile
+   sidebar), opening `/notifications/`. Unread alerts are highlighted the first time you
+   open the page, then marked read.
+3. **Orders Received** (`/orders/seller/`, also a button on the Seller Dashboard): each
+   order containing your products, showing **only your own items** plus the delivery name,
+   phone and address you need to fulfil it.
+
+Details worth knowing:
+- One alert per seller per order, even if they sold several items in it. If an order has
+  items from two sellers, each seller sees only their own items and never the other's.
+- A seller who orders their own product isn't alerted about it, and buyers aren't alerted
+  about their own purchases.
+- A seller with no email on file still gets the in-site alert.
+- A failed email never breaks a customer's checkout; the problem is logged on the server
+  and the order and in-site alert still go through.
+- Emails use the same settings as the other alerts: they print in the terminal until you
+  set real `DJANGO_EMAIL_*` values (see the Advertising section).
+- The order status isn't editable by sellers yet; Orders Received is a read-only view.
+
+### Agents are alerted when a product they shared is ordered
+
+An **Agent** (see the Agent Program section) gets an email and an in-site 🔔 alert when a
+customer orders a product **they shared**, provided the customer came through that
+agent's link. Specifically, an agent is alerted when the order contains a product they
+shared **and** either:
+- the customer followed that agent's shared link (`?ref=CODE`) earlier in their browsing
+  session, or
+- the customer originally signed up through that agent's link.
+
+What it does and doesn't do:
+- The agent is told only about the items **they** shared, not the rest of the basket, and
+  sees no buyer details at all (no name, address, phone, or email).
+- It only fires when an order is actually placed, and only for users with an Agent
+  profile. Someone who shared a product but never created an Agent profile isn't alerted.
+- Never fires for an agent's own purchases, and never for products the agent sells
+  themselves (sellers already get the order alert above).
+- If two agents both shared the same product, only the one whose link the customer used
+  is alerted.
+- This is a notification only. It does **not** award extra Loyalty Coin; points still
+  follow the existing rules (sharing, and the first-order referral bonus).
+- A customer who buys a shared product directly, without ever using the agent's link, is
+  not attributed to the agent, since there's no way to know the share led to the sale.
+
+Run `python manage.py test orders` for the tests covering all of the above.
 
 ---
 

@@ -6,6 +6,7 @@
   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
     <h1>Seller Dashboard</h1>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{% url 'orders:seller_orders' %}" class="btn btn-outline">📦 Orders Received</a>
       <a href="{% url 'agents:home' %}" class="btn btn-outline">🎯 Agent Program</a>
       <a href="{% url 'products:product_create' %}" class="btn btn-primary">+ Add New Product</a>
     </div>

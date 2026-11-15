@@ -49,6 +49,9 @@
         <a href="{% url 'orders:order_history' %}" class="nav-item hide-mobile">
           Returns<strong>&amp; Orders</strong>
         </a>
+        <a href="{% url 'notifications:list' %}" class="nav-item notif-bell" title="Notifications">
+          &#128276;{% if unread_notifications_count %}<span class="notif-badge">{{ unread_notifications_count }}</span>{% endif %}
+        </a>
         <a href="{% url 'loyalty:wallet' %}" class="nav-item loyalty-nav-badge hide-mobile" title="Loyalty Coin">
           &#129689;<strong>{{ loyalty_points_balance }} pts</strong>
         </a>
@@ -116,10 +119,12 @@
       {% if user.is_authenticated %}
         <a href="{% url 'accounts:profile' %}">Profile</a>
         <a href="{% url 'orders:order_history' %}">Your Orders</a>
+        <a href="{% url 'notifications:list' %}">&#128276; Notifications{% if unread_notifications_count %} ({{ unread_notifications_count }} new){% endif %}</a>
         <a href="{% url 'loyalty:wallet' %}">&#129689; Loyalty Coin ({{ loyalty_points_balance }} pts)</a>
         <a href="{% url 'agents:home' %}">🎯 {% if user.is_agent %}Agent Page{% else %}Become an Agent{% endif %}</a>
         {% if user.is_seller %}
           <a href="{% url 'products:seller_dashboard' %}">Seller Dashboard</a>
+          <a href="{% url 'orders:seller_orders' %}">📦 Orders Received</a>
           <a href="{% url 'products:product_create' %}">Add a Product</a>
         {% endif %}
         <form action="{% url 'accounts:logout' %}" method="post">

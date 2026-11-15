@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Notifications — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<h1>🔔 Notifications</h1>
+
+{% for n in notifications %}
+  <a href="{{ n.url|default:'#' }}" class="notification-item {% if n.pk in unread_ids %}notification-item--unread{% endif %}">
+    <div class="notification-item-head">
+      <strong>{{ n.title }}</strong>
+      <span class="helptext">{{ n.created_at|timesince }} ago</span>
+    </div>
+    {% if n.message %}<div class="notification-item-body">{{ n.message|linebreaksbr }}</div>{% endif %}
+  </a>
+{% empty %}
+  <div class="card">
+    <p>You're all caught up. When someone orders one of your products, you'll see it here.</p>
+  </div>
+{% endfor %}
+{% endblock %}

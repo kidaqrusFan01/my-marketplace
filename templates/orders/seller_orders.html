@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load currency_filters %}
+{% block title %}Orders Received — Corazon Marketplace{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+  <h1>📦 Orders Received</h1>
+  <a href="{% url 'products:seller_dashboard' %}" class="btn btn-outline btn-sm">&larr; Back to Dashboard</a>
+</div>
+<p class="helptext">Orders that include your products. Only your own items are shown for each order.</p>
+
+{% for entry in received %}
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div>
+        <strong>Order #{{ entry.order.id }}</strong>
+        <span class="helptext"> · {{ entry.order.created_at|date:"M d, Y H:i" }}</span>
+      </div>
+      <span class="badge pending">{{ entry.order.get_status_display }}</span>
+    </div>
+
+    <table class="dash-table" style="margin-top:10px;">
+      <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        {% for item in entry.items %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price|naira }}</td>
+            <td>{{ item.get_cost|naira }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p style="text-align:right; font-weight:700; margin:8px 0;">Your items total: {{ entry.total|naira }}</p>
+
+    <div class="loyalty-redeem-box" style="margin-bottom:0;">
+      <strong>Deliver to</strong><br>
+      {{ entry.order.full_name }} · {{ entry.order.phone_number }}<br>
+      {{ entry.order.address }}, {{ entry.order.city }} {{ entry.order.postal_code }}
+    </div>
+  </div>
+{% empty %}
+  <div class="card"><p>No orders yet. When a shopper orders one of your products, it will show up here and you'll get an alert.</p></div>
+{% endfor %}
+{% endblock %}

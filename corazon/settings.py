@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'loyalty',
     'marketing',
     'agents',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'products.context_processors.all_categories',
                 'loyalty.context_processors.loyalty_balance',
                 'accounts.context_processors.pending_approvals',
+                'notifications.context_processors.unread_notifications',
             ],
         },
     },
